@@ -9,13 +9,8 @@ public final class LineBreak extends SubsystemBase {
     // break its line of sight.  One half of the line break fires
     // an infrared signal, the other half detects it.
 
-    private DigitalInput input;
-    private Boolean enabled;
-
-    public LineBreak() {
-        enabled = true;
-        input = new DigitalInput(1);
-    }
+    private DigitalInput input = new DigitalInput(1);
+    private Boolean enabled = true;
 
     public Boolean broken() {
         return enabled && !input.get();
