@@ -7,6 +7,7 @@ public class Robot extends TimedRobot {
     PowerDistribution pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
     LineBreak lineBreak = new LineBreak();
     MotorSpin motor = new MotorSpin();
+    Gyro gyro = new Gyro();
 
     @Override
     public void teleopPeriodic() {
