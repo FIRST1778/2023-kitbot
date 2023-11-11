@@ -17,11 +17,11 @@ public class MotorSpin extends SubsystemBase {
     private PIDController controller = new PIDController(kP, kI, kD);
     private double desired = 0.0;  // rad/s
 
-    void spin() {
+    public void spin() {
         desired = 0.1;
     }
 
-    void stop() {
+    public void stop() {
         desired = 0.0;
     }
 
@@ -32,7 +32,7 @@ public class MotorSpin extends SubsystemBase {
     }
 
     @Override
-    void periodic() {
+    public void periodic() {
         double voltage = controller.calculate(angularVelocity(), desired);
     }
 }
