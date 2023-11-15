@@ -5,8 +5,9 @@ import edu.wpi.first.wpilibj.TimedRobot;
 
 public class Robot extends TimedRobot {
     PowerDistribution pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
-    LineBreak lineBreak = new LineBreak();
-    MotorSpin motor = new MotorSpin();
+//    LineBreak lineBreak = new LineBreak();
+//    MotorSpin motor = new MotorSpin();
+    Controls controls = new Controls();
     Gyro gyro = new Gyro();
 
     @Override
