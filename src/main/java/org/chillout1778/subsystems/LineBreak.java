@@ -1,4 +1,4 @@
-package org.chillout1778;
+package org.chillout1778.subsystems;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;

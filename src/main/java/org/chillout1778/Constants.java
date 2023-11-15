@@ -3,9 +3,14 @@ package org.chillout1778;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
-public class Constants {
+public abstract class Constants {
     public static class Pigeon {
         private static final int canId = 21;
+    }
+
+    public static class Controls {
+        public static final int driveAxisID = 2;
+        public static final int turnAxisID = 0;
     }
 
     public static class Swerve {
