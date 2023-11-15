@@ -14,10 +14,10 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         // TODO: add code to spin the motor if the linebreak is unbroken,
         // otherwise stop it
-        if (lineBreak.broken()) {
+        /*if (lineBreak.broken()) {
              motor.stop();
         } else {
             motor.spin();
-        }
+        }*/
     }
 }
