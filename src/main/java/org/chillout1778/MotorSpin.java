@@ -34,5 +34,6 @@ public class MotorSpin extends SubsystemBase {
     @Override
     public void periodic() {
         double voltage = controller.calculate(angularVelocity(), desired);
+        motor.setVoltage(voltage);
     }
 }
