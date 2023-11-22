@@ -6,6 +6,14 @@ import org.chillout1778.subsystems.Controls;
 import org.chillout1778.subsystems.Drive;
 
 public final class DriveCommand extends CommandBase {
+
+
+    private Drive drive;
+
+    public DriveCommand(Drive d) {
+        drive = d;
+        addRequirements(drive);
+    }
     private double capDriveSpeed(double speed){
         if(speed > 1){
             return 1;
@@ -24,19 +32,17 @@ public final class DriveCommand extends CommandBase {
         else {
             return currPos;
         }
-
-
     }
     @Override
     public void execute(){
-        double speed = Controls.driverController.getRawAxis(Constants.Controls.driveAxisID);
-        double turn = Controls.driverController.getRawAxis(Constants.Controls.turnAxisID);
+        double speed = Controls.driverController.getRawAxis(Constants.Controls.driveAxisID) / 2;
+        double turn = Controls.driverController.getRawAxis(Constants.Controls.turnAxisID) / 2;
 
-        double rightSpeed = capDriveSpeed(speed - turn) / 2.0; // divided by two because otherwise too fast
-        double leftSpeed = capDriveSpeed(speed + turn) / 2.0;
+        double rightSpeed = capDriveSpeed(speed - turn); // divided by two because otherwise too fast
+        double leftSpeed = capDriveSpeed(speed + turn);
 
-        Drive.setRightSpeed(handleDeadzone(rightSpeed));
-        Drive.setLeftSpeed(handleDeadzone(leftSpeed));
+        drive.setRightSpeed(handleDeadzone(rightSpeed));
+        drive.setLeftSpeed(handleDeadzone(leftSpeed));
 
     }
     @Override
@@ -51,7 +57,7 @@ public final class DriveCommand extends CommandBase {
     @Override
     public void cancel() {
         super.cancel();
-        Drive.setRightSpeed(0.0);
-        Drive.setLeftSpeed(0.0);
+        drive.setRightSpeed(0.0);
+        drive.setLeftSpeed(0.0);
     }
 }

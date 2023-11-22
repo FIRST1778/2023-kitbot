@@ -1,4 +1,4 @@
-package org.chillout1778.subsystems;
+package org.chillout1778;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -15,9 +15,14 @@ public class Robot extends TimedRobot {
     PowerDistribution pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
 //    LineBreak lineBreak = new LineBreak();
 //    MotorSpin motor = new MotorSpin();
-    Gyro gyro = new Gyro();
-    Drive drive = new Drive();
+//    Gyro gyro = new Gyro();
+    public static final Drive drive = new Drive();
 
+
+    @Override
+    public void robotInit(){
+
+    }
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
@@ -42,8 +47,8 @@ public class Robot extends TimedRobot {
         } else {
             motor.spin();
         }*/
-        Drive.setRightSpeed(0.0);
-        Drive.setLeftSpeed(0.0);
+        drive.setRightSpeed(0.0);
+        drive.setLeftSpeed(0.0);
     }
 
 }
