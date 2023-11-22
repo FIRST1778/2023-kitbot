@@ -2,7 +2,11 @@ package org.chillout1778.subsystems;
 
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.chillout1778.Constants;
+import org.chillout1778.commands.DriveCommand;
 import org.chillout1778.subsystems.Controls;
 import org.chillout1778.subsystems.Drive;
 import org.chillout1778.subsystems.Gyro;
@@ -12,10 +16,21 @@ public class Robot extends TimedRobot {
 //    LineBreak lineBreak = new LineBreak();
 //    MotorSpin motor = new MotorSpin();
     Gyro gyro = new Gyro();
+    Drive drive = new Drive();
+
+    @Override
+    public void robotPeriodic() {
+        CommandScheduler.getInstance().run();
+    }
+
+    @Override
+    public void teleopInit() {
+
+    }
 
     @Override
     public void teleopPeriodic() {
-
+//        Drive.update();
     }
 
     @Override
@@ -27,5 +42,8 @@ public class Robot extends TimedRobot {
         } else {
             motor.spin();
         }*/
+        Drive.setRightSpeed(0.0);
+        Drive.setLeftSpeed(0.0);
     }
+
 }

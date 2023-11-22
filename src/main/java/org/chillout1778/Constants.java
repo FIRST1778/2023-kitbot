@@ -9,8 +9,8 @@ public abstract class Constants {
     }
 
     public static class Controls {
-        public static final int driveAxisID = 2;
-        public static final int turnAxisID = 0;
+        public static final int driveAxisID = 1;
+        public static final int turnAxisID = 4;
     }
 
     public static class Swerve {
