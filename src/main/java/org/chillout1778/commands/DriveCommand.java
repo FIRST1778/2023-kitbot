@@ -5,7 +5,7 @@ import org.chillout1778.Constants;
 import org.chillout1778.subsystems.Controls;
 import org.chillout1778.subsystems.Drive;
 
-public final class DriveCommand extends CommandBase {
+public class DriveCommand extends CommandBase {
     private Drive drive;
 
     public DriveCommand(Drive d) {

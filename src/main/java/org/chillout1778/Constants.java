@@ -3,7 +3,7 @@ package org.chillout1778;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
-public abstract class Constants {
+public class Constants {
     public static class Pigeon {
         private static final int canId = 21;
     }

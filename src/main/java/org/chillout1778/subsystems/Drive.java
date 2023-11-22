@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.chillout1778.Constants;
 import org.chillout1778.commands.DriveCommand;
 
-public class Drive extends SubsystemBase{
+public class Drive extends SubsystemBase {
     private CANSparkMax leftParentMotor = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
     private CANSparkMax leftChildMotor = new CANSparkMax(2, CANSparkMaxLowLevel.MotorType.kBrushless);
 
