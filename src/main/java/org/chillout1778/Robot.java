@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.chillout1778.Constants;
+import org.chillout1778.commands.AutonomousCommand;
 import org.chillout1778.commands.DriveCommand;
 import org.chillout1778.subsystems.Controls;
 import org.chillout1778.subsystems.Drive;
@@ -18,6 +19,11 @@ public class Robot extends TimedRobot {
 //    Gyro gyro = new Gyro();
     public static final Drive drive = new Drive();
 
+
+    @Override
+    public void autonomousInit() {
+        new AutonomousCommand(drive).schedule();
+    }
 
     @Override
     public void robotInit(){

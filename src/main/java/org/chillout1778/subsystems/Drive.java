@@ -26,4 +26,9 @@ public class Drive extends SubsystemBase{
     public void setLeftSpeed(double speed) {
         leftParentMotor.set(speed);
     }
+
+    public void setBothSpeeds(double speed){
+        setLeftSpeed(speed);
+        setRightSpeed(speed);
+    }
 }

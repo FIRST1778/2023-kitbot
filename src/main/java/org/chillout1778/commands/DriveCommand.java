@@ -6,8 +6,6 @@ import org.chillout1778.subsystems.Controls;
 import org.chillout1778.subsystems.Drive;
 
 public final class DriveCommand extends CommandBase {
-
-
     private Drive drive;
 
     public DriveCommand(Drive d) {
@@ -35,7 +33,7 @@ public final class DriveCommand extends CommandBase {
     }
     @Override
     public void execute(){
-        double speed = Controls.driverController.getRawAxis(Constants.Controls.driveAxisID) / 2;
+        double speed = -Controls.driverController.getRawAxis(Constants.Controls.driveAxisID) / 2;
         double turn = Controls.driverController.getRawAxis(Constants.Controls.turnAxisID) / 2;
 
         double rightSpeed = capDriveSpeed(speed - turn); // divided by two because otherwise too fast

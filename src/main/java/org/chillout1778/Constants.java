@@ -8,6 +8,11 @@ public abstract class Constants {
         private static final int canId = 21;
     }
 
+    public static class Autonomous {
+        public static final double driveSpeed = 0.1;
+        public static final double timeDriving = 4.0;
+    }
+
     public static class Controls {
         public static final int driveAxisID = 1;
         public static final int turnAxisID = 4;
