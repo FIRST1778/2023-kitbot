@@ -13,12 +13,8 @@ import org.chillout1778.subsystems.Drive;
 import org.chillout1778.subsystems.Gyro;
 
 public class Robot extends TimedRobot {
-    PowerDistribution pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
-//    LineBreak lineBreak = new LineBreak();
-//    MotorSpin motor = new MotorSpin();
-//    Gyro gyro = new Gyro();
-    public static final Drive drive = new Drive();
-
+    private final PowerDistribution pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
+    private final Drive drive = new Drive();
 
     @Override
     public void autonomousInit() {
