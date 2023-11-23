@@ -1,4 +1,4 @@
-package org.chillout1778;
+package org.chillout1778.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
