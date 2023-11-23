@@ -1,10 +1,20 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2023.3.2"
+    id "org.jetbrains.kotlin.jvm" version "1.8.0"
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+def javaVersion = JavaVersion.VERSION_11
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+
+compileKotlin {
+    kotlinOptions.jvmTarget = javaVersion.toString()
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = javaVersion.toString()
+}
 
 def ROBOT_MAIN_CLASS = "org.chillout1778.Main"
 
@@ -48,6 +58,7 @@ def includeDesktopSupport = false
 // Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
 // Also defines JUnit 5.
 dependencies {
+
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
@@ -68,6 +79,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
 }
 
 test {
@@ -100,4 +112,14 @@ wpi.java.configureTestTasks(test)
 // Configure string concat to always inline compile
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }

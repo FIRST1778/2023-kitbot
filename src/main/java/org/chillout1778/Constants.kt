@@ -1,35 +1,33 @@
-package org.chillout1778;
+package org.chillout1778
 
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.math.util.Units
+import kotlin.math.sqrt
 
-public abstract class Constants {
-    public static class Pigeon {
-        private static final int canId = 21;
+object Constants {
+    object Pigeon {
+        const val canId = 21
     }
 
-    public static class Controls {
-        public static final int driveAxisID = 1;
-        public static final int turnAxisID = 4;
+    object Controls {
+        const val driveAxisID = 1
+        const val turnAxisID = 4
     }
 
-    public static class Swerve {
+    object Swerve {
         // The swerve modules are located at (11.75,11.75) and its
         // reflections across the x- and y-axis.
-        private static final double moduleXY = Units.inchesToMeters(11.75);
-        private static final double moduleRadius = moduleXY * Math.sqrt(2);
+        val moduleXY = Units.inchesToMeters(11.75)
+        val moduleRadius = moduleXY * sqrt(2.0)
 
         // The gear ratio for an MK4i L2 swerve module, about 6.75 : 1.
         // We multiply by "(driving gear teeth) / (driven gear teeth)"
         // for each stage of the gearbox.
         // https://www.swervedrivespecialties.com/products/mk4i-swerve-module
-        private static final double driveReduction = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0);
-
-        private static final double colsonWheelRadius = Units.inchesToMeters(2.0);
-        private static final double maxSpeed = DCMotor.getNEO(1).freeSpeedRadPerSec * driveReduction * colsonWheelRadius;
-        private static final double maxAngularSpeed = maxSpeed / moduleRadius;
-
-        // TODO: azimuth encoder issues?
+        const val driveReduction = 14.0 / 50.0 * (27.0 / 17.0) * (15.0 / 45.0)
+        val colsonWheelRadius = Units.inchesToMeters(2.0)
+        val maxSpeed = DCMotor.getNEO(1).freeSpeedRadPerSec * driveReduction * colsonWheelRadius
+        val maxAngularSpeed = maxSpeed / moduleRadius // TODO: azimuth encoder issues?
         //
         // We use both a CANCoder (absolute) and the NEO's built-in
         // encoder (relative, but faster) to measure swerve azimuth.
