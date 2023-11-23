@@ -6,11 +6,8 @@ import org.chillout1778.subsystems.Controls;
 import org.chillout1778.subsystems.Drive;
 
 public class DriveCommand extends CommandBase {
-    private Drive drive;
-
-    public DriveCommand(Drive d) {
-        drive = d;
-        addRequirements(drive);
+    public DriveCommand() {
+        addRequirements(Drive.i());
     }
     private double capDriveSpeed(double speed){
         if(speed > 1){
@@ -39,8 +36,8 @@ public class DriveCommand extends CommandBase {
         double rightSpeed = capDriveSpeed(speed - turn); // divided by two because otherwise too fast
         double leftSpeed = capDriveSpeed(speed + turn);
 
-        drive.setRightSpeed(handleDeadzone(rightSpeed));
-        drive.setLeftSpeed(handleDeadzone(leftSpeed));
+        Drive.i().setRightSpeed(handleDeadzone(rightSpeed));
+        Drive.i().setLeftSpeed(handleDeadzone(leftSpeed));
 
     }
     @Override
@@ -55,7 +52,7 @@ public class DriveCommand extends CommandBase {
     @Override
     public void cancel() {
         super.cancel();
-        drive.setRightSpeed(0.0);
-        drive.setLeftSpeed(0.0);
+        Drive.i().setRightSpeed(0.0);
+        Drive.i().setLeftSpeed(0.0);
     }
 }

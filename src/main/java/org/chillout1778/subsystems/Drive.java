@@ -8,6 +8,9 @@ import org.chillout1778.Constants;
 import org.chillout1778.commands.DriveCommand;
 
 public class Drive extends SubsystemBase {
+    private static Drive i;
+    public static Drive i() {if (i == null) i = new Drive(); return i;}
+
     private CANSparkMax leftParentMotor = new CANSparkMax(1, CANSparkMaxLowLevel.MotorType.kBrushless);
     private CANSparkMax leftChildMotor = new CANSparkMax(2, CANSparkMaxLowLevel.MotorType.kBrushless);
 
@@ -15,7 +18,7 @@ public class Drive extends SubsystemBase {
     private CANSparkMax rightChildMotor = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
 
     public Drive(){
-        setDefaultCommand(new DriveCommand(this));
+        setDefaultCommand(new DriveCommand());
         leftChildMotor.follow(leftParentMotor);
         rightChildMotor.follow(rightParentMotor);
     }

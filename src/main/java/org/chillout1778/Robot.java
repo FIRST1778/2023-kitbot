@@ -14,43 +14,27 @@ import org.chillout1778.subsystems.Gyro;
 
 public class Robot extends TimedRobot {
     private final PowerDistribution pdh = new PowerDistribution(1, PowerDistribution.ModuleType.kRev);
-    private final Drive drive = new Drive();
+
+    // Available methods:
+    // robotInit()      robotPeriodic()
+    // disabledInit()   disabledPeriodic()   disabledExit()
+    // autonomousInit() autonomousPeriodic() autonomousExit()
+    // teleopInit()     teleopPeriodic()     teleopExit()
+    // testInit()       testPeriodic()       testExit()
 
     @Override
     public void autonomousInit() {
-        new AutonomousCommand(drive).schedule();
+        new AutonomousCommand().schedule();
     }
 
-    @Override
-    public void robotInit(){
-
-    }
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
     }
 
     @Override
-    public void teleopInit() {
-
-    }
-
-    @Override
-    public void teleopPeriodic() {
-//        Drive.update();
-    }
-
-    @Override
     public void disabledInit() {
-        // TODO: add code to spin the motor if the linebreak is unbroken,
-        // otherwise stop it
-        /*if (lineBreak.broken()) {
-             motor.stop();
-        } else {
-            motor.spin();
-        }*/
-        drive.setRightSpeed(0.0);
-        drive.setLeftSpeed(0.0);
+        Drive.i().setRightSpeed(0.0);
+        Drive.i().setLeftSpeed(0.0);
     }
-
 }
