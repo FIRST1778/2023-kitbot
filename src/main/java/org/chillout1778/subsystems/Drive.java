@@ -14,20 +14,21 @@ public class Drive extends SubsystemBase {
     private CANSparkMax rightParentMotor = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
     private CANSparkMax rightChildMotor = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-    public Drive(){
+    public Drive() {
         setDefaultCommand(new DriveCommand(this));
         leftChildMotor.follow(leftParentMotor);
         rightChildMotor.follow(rightParentMotor);
     }
 
-    public void setRightSpeed(double speed){
+    public void setRightSpeed(double speed) {
         rightParentMotor.set(speed);
     }
+
     public void setLeftSpeed(double speed) {
         leftParentMotor.set(speed);
     }
 
-    public void setBothSpeeds(double speed){
+    public void setBothSpeeds(double speed) {
         setLeftSpeed(speed);
         setRightSpeed(speed);
     }

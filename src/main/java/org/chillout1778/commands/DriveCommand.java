@@ -12,44 +12,28 @@ public class DriveCommand extends CommandBase {
         drive = d;
         addRequirements(drive);
     }
-    private double capDriveSpeed(double speed){
-        if(speed > 1){
+
+    private double capDriveSpeed(double speed) {
+        if (speed > 1) {
             return 1;
-        }
-        else if(speed < -1){
+        } else if (speed < -1) {
             return -1;
-        }
-        else {
+        } else {
             return speed;
         }
     }
-    private double handleDeadzone(double currPos){
-        if(Math.abs(currPos)< 0.1) {
-            return 0.0;
-        }
-        else {
-            return currPos;
-        }
-    }
-    @Override
-    public void execute(){
-        double speed = -Controls.driverController.getRawAxis(Constants.Controls.driveAxisID) / 2;
-        double turn = Controls.driverController.getRawAxis(Constants.Controls.turnAxisID) / 2;
 
-        double rightSpeed = capDriveSpeed(speed - turn); // divided by two because otherwise too fast
+    @Override
+    public void execute() {
+        double speed = Controls.i().driveFactor();
+        double turn = Controls.i().turnFactor();
+
+        double rightSpeed = capDriveSpeed(speed - turn);
         double leftSpeed = capDriveSpeed(speed + turn);
 
-        drive.setRightSpeed(handleDeadzone(rightSpeed));
-        drive.setLeftSpeed(handleDeadzone(leftSpeed));
+        drive.setRightSpeed(rightSpeed);
+        drive.setLeftSpeed(leftSpeed);
 
-    }
-    @Override
-    public boolean isFinished(){
-        return false;
-    }
-    @Override
-    public boolean runsWhenDisabled(){
-        return false;
     }
 
     @Override
