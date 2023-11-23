@@ -9,6 +9,11 @@ object Constants {
         const val canId = 21
     }
 
+    object Autonomous {
+        const val driveSpeed = 0.1
+        const val timeDriving = 4.0
+    }
+
     object Controls {
         const val driveAxisID = 1
         const val turnAxisID = 4

@@ -24,4 +24,9 @@ object Drive : SubsystemBase() {
     fun setLeftSpeed(speed: Double) {
         leftParentMotor.set(speed)
     }
+
+    fun setBothSpeeds(speed: Double){
+        setRightSpeed(speed)
+        setLeftSpeed(speed)
+    }
 }

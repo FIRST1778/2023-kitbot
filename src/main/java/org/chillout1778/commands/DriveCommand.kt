@@ -28,7 +28,7 @@ class DriveCommand : CommandBase() {
     }
 
     override fun execute() {
-        val speed = Controls.driverController.getRawAxis(Constants.Controls.driveAxisID) / 2
+        val speed = -Controls.driverController.getRawAxis(Constants.Controls.driveAxisID) / 2
         val turn = Controls.driverController.getRawAxis(Constants.Controls.turnAxisID) / 2
         val rightSpeed = capDriveSpeed(speed - turn) // divided by two because otherwise too fast
         val leftSpeed = capDriveSpeed(speed + turn)
