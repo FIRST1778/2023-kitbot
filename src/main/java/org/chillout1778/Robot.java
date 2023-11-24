@@ -17,22 +17,23 @@ public class Robot extends TimedRobot {
     private final Drive drive = new Drive();
 
     @Override
+    public void robotInit() {
+        // If the field is asymmetric rotationally (aka, things can be
+        // on your left or your right depending on the alliance), we
+        // would add the inversion logic here.
+    }
+
+    @Override
     public void autonomousInit() {
         new AutonomousCommand(drive).schedule();
     }
 
     @Override
-    public void robotInit(){
+    public void teleopInit() {}
 
-    }
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-    }
-
-    @Override
-    public void teleopInit() {
-
     }
 
     @Override

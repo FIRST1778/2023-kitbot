@@ -25,8 +25,8 @@ public class DriveCommand extends CommandBase {
 
     @Override
     public void execute() {
-        double speed = Controls.i().driveFactor();
-        double turn = Controls.i().turnFactor();
+        double speed = Controls.getInstance().driveFactor();
+        double turn = Controls.getInstance().turnFactor();
 
         double rightSpeed = capDriveSpeed(speed - turn);
         double leftSpeed = capDriveSpeed(speed + turn);

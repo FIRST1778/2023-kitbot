@@ -6,8 +6,11 @@ import org.chillout1778.Robot;
 import org.chillout1778.Constants;
 
 public class Controls {
-    private static Controls i;
-    public  static Controls i() {if (i == null) i = new Controls(); return i;}
+    private static Controls instance;
+    public static Controls getInstance() {
+        if (instance == null) instance = new Controls();
+        return instance;
+    }
 
     private final Joystick driver = new Joystick(0);
 
