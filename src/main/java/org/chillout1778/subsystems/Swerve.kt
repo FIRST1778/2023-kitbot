@@ -95,12 +95,10 @@ object Swerve: SubsystemBase() {
 
     fun update(x: Double, y: Double, rot: Double) {
         val states = kinematics.toSwerveModuleStates(
-            // TODO: discretize doesn't build, presuambly it's in the
-            // 2024 edition but I can't look it up right now.
-            ChassisSpeeds.discretize(
-                ChassisSpeeds.fromFieldRelativeSpeeds(
-                    x, y, rot, Gyro.rotation
-                )
+            // TODO: use ChassisSpeeds.discretize() once we have
+            // WPILib 2024
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                x, y, rot, Gyro.rotation
             )
         )
     }
