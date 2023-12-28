@@ -1,11 +1,15 @@
 package org.chillout1778
 
+import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
 
 
 object Robot : TimedRobot() {
+    fun start(){
+        RobotBase.startRobot{this}
+    }
     var ctreConfigs: CTREConfigs? = null
 
     private var m_autonomousCommand: Command? = null
