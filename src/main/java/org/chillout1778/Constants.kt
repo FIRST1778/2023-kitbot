@@ -1,6 +1,10 @@
 package org.chillout1778
 
+import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.ProfiledPIDController
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.system.plant.DCMotor
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import kotlin.math.sqrt
 
@@ -34,20 +38,24 @@ object Constants {
         val theoreticalMaxSpeed = DCMotor.getNEO(1).freeSpeedRadPerSec * driveReduction * colsonWheelRadius
         val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius // TODO: azimuth encoder issues?
 
-        // I don't know how to calculate this properly.
+        val maxSpeed = theoreticalMaxSpeed  // maybe this is a bad idea?
+        val maxAngularSpeed = theoreticalMaxAngularSpeed
         val maxAngularAcceleration = Math.PI / 2.0
 
-        // We use both a CANCoder (absolute) and the NEO's built-in
-        // encoder (relative, but faster) to measure swerve azimuth.
-        // Last year, we implemented a hack that would reset the NEO
-        // to the CANCoder if the motor didn't move for 10 seconds,
-        // because there was an edge case where the CANCoder wouldn't be
-        // accurate at the start of the match.  We can add this hack
-        // back if we experience CANCoder issues.
-        //
-        // https://store.ctr-electronics.com/blog/cancoder-firmware-update-22012/
-        // https://discord.com/channels/887922855084425266/890436659450118254/1170883077195714590
-        // https://github.com/SwerveDriveSpecialties/Do-not-use-swerve-lib-2022-unmaintained/blob/55f3f1ad9e6bd81e56779d022a40917aacf8d3b3/src/main/java/com/swervedrivespecialties/swervelib/rev/NeoSteerControllerFactoryBuilder.java#L128C3-L128C3
-        // https://github.com/FIRST1778/2023-Robot-Code/blob/36a38de7a1d7970517fe18e7506582187ec46491/src/main/java/org/frc1778/lib/FalconNeoSwerveModule.kt#L127
+        // TODO: ************************ CRITICAL TO TUNE vvvvv
+        // These values, other than the TrapezoidProfile, are taken from
+        // last year's codebase.  The trapezoid profile calculations
+        // were wrong; the new values may be too fast.
+        // If the PID values are too slow, it will limit our max speed.
+        fun driveController() = PIDController(0.75, 0.0, 0.15)
+        fun turnController()  = ProfiledPIDController(0.2, 0.0, 0.02,
+            TrapezoidProfile.Constraints(
+                maxAngularSpeed, maxAngularAcceleration
+            )
+        )
+        // TODO: These need to be created, but I don't know how to do
+        // motor characterizations.
+        fun driveFeedforward() = SimpleMotorFeedforward(0.0, 0.0, 0.0)
+        fun turnFeedforward()  = SimpleMotorFeedforward(0.0, 0.0, 0.0)
     }
 }
