@@ -17,26 +17,30 @@ import org.chillout1778.lib.Util
 class SwerveModule(
         driveMotorId: Int, turnMotorId: Int, turnCanCoderId: Int,
         val encoderOffset: Double,
-        val driveInversion: Double,
+        val driveInverted: Boolean,
         val translation: Translation2d
 ) {
     private val driveMotor: CANSparkMax = Util.defaultNeo(driveMotorId)
     private val turnMotor: CANSparkMax  = Util.defaultNeo(turnMotorId)
     private val turnCanCoder: CANCoder = Util.defaultCanCoder(turnCanCoderId)
-        .also { it.configMagnetOffset(encoderOffset) }
 
     private val drivePID: PIDController = Constants.Swerve.driveController()
     private val turnPID: ProfiledPIDController = Constants.Swerve.turnController()
-        .also { it.enableContinuousInput(-Math.PI, Math.PI) }
     private val driveFeedforward: SimpleMotorFeedforward = Constants.Swerve.driveFeedforward()
     private val turnFeedforward:  SimpleMotorFeedforward = Constants.Swerve.turnFeedforward()
+
+    init {
+        driveMotor.setInverted(driveInverted)
+        turnMotor.setInverted(true)
+        turnCanCoder.configMagnetOffset(encoderOffset)
+        turnPID.enableContinuousInput(-Math.PI, Math.PI)
+        resetRelative()
+    }
 
     private fun resetRelative() {
         turnMotor.encoder.position = turnCanCoder.position
     }
     
-    init { resetRelative() }
-
     val state get() = SwerveModuleState(
         driveMotor.encoder.velocity, Rotation2d(turnMotor.encoder.position)
     )
@@ -72,13 +76,13 @@ class SwerveModule(
         // TODO: My understanding from last year's code is that
         // all modules have azimuth inversion and half have
         // drive inversion.
-        driveMotor.setVoltage(driveInversion * (
+        driveMotor.setVoltage(
             drivePID.calculate(driveMotor.encoder.velocity, state.speedMetersPerSecond)
             + driveFeedforward.calculate(state.speedMetersPerSecond)
-        ))
-        turnMotor.setVoltage(-1.0 * (
+        )
+        turnMotor.setVoltage(
             turnPID.calculate(turnMotor.encoder.position, state.angle.radians)
             + turnFeedforward.calculate(turnPID.setpoint.velocity)
-        ))
+        )
     }
 }

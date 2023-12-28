@@ -25,7 +25,7 @@ object Swerve: SubsystemBase() {
             turnMotorId = 5,
             turnCanCoderId = 10,
             encoderOffset = Math.toRadians(66.23),
-            driveInversion = -1.0,
+            driveInverted = true,
             translation = moduleTranslation(1.0, 1.0)
         ),
         SwerveModule(
@@ -34,7 +34,7 @@ object Swerve: SubsystemBase() {
             turnMotorId = 7,
             turnCanCoderId = 11,
             encoderOffset = Math.toRadians(252.4),
-            driveInversion = 1.0,
+            driveInverted = false,
             translation = moduleTranslation(1.0, -1.0)
         ),
         SwerveModule(
@@ -43,7 +43,7 @@ object Swerve: SubsystemBase() {
             turnMotorId = 1,
             turnCanCoderId = 12,
             encoderOffset = Math.toRadians(109.1),
-            driveInversion = 1.0,
+            driveInverted = false,
             translation = moduleTranslation(-1.0, -1.0)
         ),
         SwerveModule(
@@ -52,7 +52,7 @@ object Swerve: SubsystemBase() {
             turnMotorId = 3,
             turnCanCoderId = 13,
             encoderOffset = Math.toRadians(250.2),
-            driveInversion = -1.0,
+            driveInverted = true,
             translation = moduleTranslation(-1.0, 1.0)
         ),
     )
