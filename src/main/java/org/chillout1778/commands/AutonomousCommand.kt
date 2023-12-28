@@ -3,8 +3,8 @@ package org.chillout1778.commands
 import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj2.command.CommandBase
 import org.chillout1778.Constants
-import org.chillout1778.subsystems.Drive
 
+/*
 class AutonomousCommand : CommandBase() {
     private val timer = Timer()
     override fun initialize() {
@@ -33,3 +33,4 @@ class AutonomousCommand : CommandBase() {
         Drive.setBothSpeeds(0.0)
     }
 }
+*/

@@ -31,9 +31,12 @@ object Constants {
         // https://www.swervedrivespecialties.com/products/mk4i-swerve-module
         const val driveReduction = 14.0 / 50.0 * (27.0 / 17.0) * (15.0 / 45.0)
         val colsonWheelRadius = Units.inchesToMeters(2.0)
-        val maxSpeed = DCMotor.getNEO(1).freeSpeedRadPerSec * driveReduction * colsonWheelRadius
-        val maxAngularSpeed = maxSpeed / moduleRadius // TODO: azimuth encoder issues?
-        //
+        val theoreticalMaxSpeed = DCMotor.getNEO(1).freeSpeedRadPerSec * driveReduction * colsonWheelRadius
+        val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius // TODO: azimuth encoder issues?
+
+        // I don't know how to calculate this properly.
+        val maxAngularAcceleration = Math.PI / 2.0
+
         // We use both a CANCoder (absolute) and the NEO's built-in
         // encoder (relative, but faster) to measure swerve azimuth.
         // Last year, we implemented a hack that would reset the NEO

@@ -1,38 +1,38 @@
 package org.chillout1778.subsystems
 
-import org.chillout1778.lib.NEO
 import com.ctre.phoenix.sensors.CANCoder
-import com.ctre.phoenix.sensors.CANCoderConfiguration
-import com.ctre.phoenix.sensors.SensorTimeBase
 import com.revrobotics.CANSparkMax
-import com.revrobotics.CANSparkMaxLowLevel
+import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
+import edu.wpi.first.math.kinematics.SwerveModulePosition
+import edu.wpi.first.math.kinematics.SwerveModuleState
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import org.chillout1778.lib.Util
 
-class SwerveModule(driveMotorId: Int, turnMotorId: Int, turnCanCoderId: Int): SubsystemBase() {
-    // Hall-Sensor Encoder Resolution: 42 counts per rev.
-    private val driveMotor = NEO(driveMotorId)
-    private val turnMotor = NEO(turnMotorId)
+class SwerveModule(
+        driveMotorId: Int, turnMotorId: Int, turnCanCoderId: Int,
+        val encoderOffset: Double,
+        val inverted: Boolean,
+        val translation: Translation2d
+) {
+    private val driveMotor: CANSparkMax = Util.defaultNeo(driveMotorId)
+    private val turnMotor: CANSparkMax  = Util.defaultNeo(turnMotorId)
+    private val turnCanCoder: CANCoder = Util.defaultCanCoder(turnCanCoderId)
 
-    private val turnCanCoder = CANCoder(turnCanCoderId)
-    init {
-        val config = CANCoderConfiguration()
-        config.sensorCoefficient = Math.PI * 2.0 / 4096.0
-        config.unitString = "rad"
-        config.sensorTimeBase = SensorTimeBase.PerSecond
-        turnCanCoder.configAllSettings(config)
+    private fun resetRelative() {
+        turnMotor.encoder.position = turnCanCoder.position
     }
 
-    fun resetRelative() {
-        turnMotor.position = turnCanCoder.position / 360.0
-    }
+    val state get() = SwerveModuleState(
+        driveMotor.encoder.velocity, Rotation2d(turnMotor.encoder.position)
+    )
+    val position get() = SwerveModulePosition(
+        driveMotor.encoder.position, Rotation2d(turnMotor.encoder.position)
+    )
 
-    fun getTurnPosition() = turnMotor.position
-    fun getTurnVelocity() = turnMotor.velocity
-    fun getDriveVelocity() = driveMotor.velocity
-
-    private var turnStationaryTicks = 0
-    override fun periodic() {
-        if (getTurnVelocity() < 0.3) {
+    private var turnStationaryTicks: Int = 0
+    fun update() {
+        if (turnMotor.encoder.velocity < 0.3) {
             turnStationaryTicks += 1
         } else {
             turnStationaryTicks = 0
