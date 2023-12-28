@@ -15,10 +15,11 @@ import org.chillout1778.Constants
 import org.chillout1778.lib.Util
 
 class SwerveModule(
+        val name: String,
         driveMotorId: Int, turnMotorId: Int, turnCanCoderId: Int,
         val encoderOffset: Double,
         val driveInverted: Boolean,
-        val translation: Translation2d
+        val translation: Translation2d,
 ) {
     private val driveMotor: CANSparkMax = Util.defaultNeo(driveMotorId)
     private val turnMotor: CANSparkMax  = Util.defaultNeo(turnMotorId)
@@ -38,6 +39,7 @@ class SwerveModule(
     }
 
     private fun resetRelative() {
+        System.out.printf("Resetting %s swerve encoder from absolute\n", name)
         turnMotor.encoder.position = turnCanCoder.position
     }
     

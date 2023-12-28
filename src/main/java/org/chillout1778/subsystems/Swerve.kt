@@ -20,7 +20,7 @@ object Swerve: SubsystemBase() {
 
     val modules = arrayOf(
         SwerveModule(
-            // Front left
+            name = "front left",
             driveMotorId = 6,
             turnMotorId = 5,
             turnCanCoderId = 10,
@@ -29,7 +29,7 @@ object Swerve: SubsystemBase() {
             translation = moduleTranslation(1.0, 1.0)
         ),
         SwerveModule(
-            // Front right
+            name = "front right",
             driveMotorId = 8,
             turnMotorId = 7,
             turnCanCoderId = 11,
@@ -38,7 +38,7 @@ object Swerve: SubsystemBase() {
             translation = moduleTranslation(1.0, -1.0)
         ),
         SwerveModule(
-            // Back right
+            name = "back right",
             driveMotorId = 2,
             turnMotorId = 1,
             turnCanCoderId = 12,
@@ -47,7 +47,7 @@ object Swerve: SubsystemBase() {
             translation = moduleTranslation(-1.0, -1.0)
         ),
         SwerveModule(
-            // Back left
+            name = "back left",
             driveMotorId = 4,
             turnMotorId = 3,
             turnCanCoderId = 13,
