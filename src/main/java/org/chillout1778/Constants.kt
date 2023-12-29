@@ -43,22 +43,25 @@ object Constants {
         val maxAngularAcceleration = Math.PI / 2.0
 
         // TODO: ************************ CRITICAL TO TUNE vvvvv
-        // These values, other than the TrapezoidProfile, are taken from
-        // last year's codebase.  The trapezoid profile calculations
-        // were wrong; the new values may be too fast.
-        // If the PID values are too slow, it will limit our max speed.
-        fun driveController() = PIDController(0.75, 0.0, 0.15)
-        fun turnController()  = ProfiledPIDController(0.2, 0.0, 0.02,
+        // If the PID values are too slow, they will limit our max speed.
+        // These map error to velocity.
+        //
+        // If we are driving at 0.1 m/s and want to drive at 1 m/s, the
+        // velocity error is 0.9.  We calculate an output using the
+        // driveController: 0.09 m/s.  (This is purposely very slow).
+        //
+        // If our turning encoder is 1 rad from where it needs to be,
+        // we plug that into turnController and get an output: 0.1 rad/s.
+        //
+        // Then we do outputVelocity / maxVelocity * 12.0 to convert
+        // those velocities into voltages (see SwerveModule.drive()).
+        fun driveController() = PIDController(0.1, 0.0, 0.01)
+        fun turnController()  = ProfiledPIDController(0.1, 0.0, 0.01,
             TrapezoidProfile.Constraints(
                 maxAngularSpeed, maxAngularAcceleration
             )
         )
-        // TODO: These need to be created, but I don't know how to do
-        // motor characterizations.
         fun driveFeedforward() = SimpleMotorFeedforward(0.0, 0.0, 0.0)
         fun turnFeedforward()  = SimpleMotorFeedforward(0.0, 0.0, 0.0)
-
-        val maxDriveVoltage = 12.0
-        val maxTurnVoltage = 12.0
     }
 }

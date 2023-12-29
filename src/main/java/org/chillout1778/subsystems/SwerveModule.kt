@@ -75,6 +75,8 @@ class SwerveModule(
         }
     }
 
+    private fun clampVoltage(n: Double) = Math.min(12.0, Math.max(-12.0, n))
+
     fun drive(unoptimizedState: SwerveModuleState) {
         // Optimize the swerve module state (i.e., drive velocity
         // and turn position) so that we never turn more than 90 degrees.
@@ -85,14 +87,11 @@ class SwerveModule(
         // desired angle, then we drive it correspondingly less.
         state.speedMetersPerSecond *= (state.angle - rotation).getCos()
 
-        // TODO: My understanding from last year's code is that
-        // all modules have azimuth inversion and half have
-        // drive inversion.
-        val driveVoltage = drivePID.calculate(driveMotor.encoder.velocity, state.speedMetersPerSecond)
+        val driveAmount = drivePID.calculate(driveMotor.encoder.velocity, state.speedMetersPerSecond)
             + driveFeedforward.calculate(state.speedMetersPerSecond)
-        val turnVoltage = turnPID.calculate(turnMotor.encoder.position, state.angle.radians)
+        val turnAmount = turnPID.calculate(turnMotor.encoder.position, state.angle.radians)
             + turnFeedforward.calculate(turnPID.setpoint.velocity)
-        driveMotor.setVoltage(Util.clamp(driveVoltage, Constants.Swerve.maxDriveVoltage))
-        turnMotor.setVoltage(Util.clamp(turnVoltage, Constants.Swerve.maxTurnVoltage))
+        driveMotor.setVoltage(clampVoltage(driveAmount / Constants.Swerve.maxSpeed * 12.0))
+        turnMotor.setVoltage(clampVoltage(turnAmount / Constants.Swerve.maxAngularSpeed * 12.0))
     }
 }
