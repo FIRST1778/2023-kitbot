@@ -10,7 +10,7 @@ import org.chillout1778.subsystems.Gyro
 object Robot : TimedRobot() {
     fun start() {
         // Is this necessary?
-        RobotBase.startRobot{this}
+        //RobotBase.startRobot{this}
         // Probably a good idea to initialize singleton objects
         Gyro
         Swerve
@@ -21,6 +21,8 @@ object Robot : TimedRobot() {
 
     override fun robotPeriodic() {
         CommandScheduler.getInstance().run()
+        for (mod in Swerve.modules)
+            mod.maybeResetRelative()
     }
 
     override fun teleopPeriodic() {

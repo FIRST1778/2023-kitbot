@@ -49,7 +49,15 @@ class SwerveModule(
 
     private fun resetRelative() {
         System.out.printf("Resetting %s swerve encoder from absolute\n", name)
-        turnMotor.encoder.position = turnCanCoder.position
+        // Use the CANCoder's .getAbsolutePosition() API instead of
+        // .getPosition().  Even though we tell the CANCoder to boot up
+        // in absolute mode (see Util.kt), there were apparently some
+        // firmware bugs that would rarely cause .getPosition() to report
+        // incorrect values after startup.
+        // https://store.ctr-electronics.com/blog/cancoder-firmware-update-22012/
+        // https://discord.com/channels/887922855084425266/890436659450118254/1170883077195714590
+        // https://github.com/SwerveDriveSpecialties/Do-not-use-swerve-lib-2022-unmaintained/blob/55f3f1ad9e6bd81e56779d022a40917aacf8d3b3/src/main/java/com/swervedrivespecialties/swervelib/rev/NeoSteerControllerFactoryBuilder.java#L128C3-L128C3
+        turnMotor.encoder.position = turnCanCoder.absolutePosition
         turnStationaryTicks = 0
     }
     
