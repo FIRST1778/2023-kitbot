@@ -75,7 +75,8 @@ class SwerveModule(
         }
     }
 
-    private fun clampVoltage(n: Double) = Math.min(12.0, Math.max(-12.0, n))
+    private fun clamp(n: Double, r: Double) = Math.min(r, Math.max(-r, n))
+    private fun clampVoltage(n: Double) = clamp(n, Constants.Swerve.maxVoltage)
 
     fun drive(unoptimizedState: SwerveModuleState) {
         // Optimize the swerve module state (i.e., drive velocity
@@ -91,7 +92,7 @@ class SwerveModule(
             + driveFeedforward.calculate(state.speedMetersPerSecond)
         val turnAmount = turnPID.calculate(turnMotor.encoder.position, state.angle.radians)
             + turnFeedforward.calculate(turnPID.setpoint.velocity)
-        driveMotor.setVoltage(clampVoltage(driveAmount / Constants.Swerve.maxSpeed * 12.0))
-        turnMotor.setVoltage(clampVoltage(turnAmount / Constants.Swerve.maxAngularSpeed * 12.0))
+        driveMotor.setVoltage(clampVoltage(driveAmount / Constants.Swerve.maxSpeed * Constants.Swerve.maxVoltage))
+        turnMotor.setVoltage(clampVoltage(turnAmount / Constants.Swerve.maxAngularSpeed * Constants.Swerve.maxVoltage))
     }
 }

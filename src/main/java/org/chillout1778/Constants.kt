@@ -3,7 +3,6 @@ package org.chillout1778
 import edu.wpi.first.math.controller.PIDController
 import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
-import edu.wpi.first.math.system.plant.DCMotor
 import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import kotlin.math.sqrt
@@ -33,14 +32,16 @@ object Constants {
         // We multiply by "(driving gear teeth) / (driven gear teeth)"
         // for each stage of the gearbox.
         // https://www.swervedrivespecialties.com/products/mk4i-swerve-module
-        const val driveReduction = 14.0 / 50.0 * (27.0 / 17.0) * (15.0 / 45.0)
+        const val driveReduction = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)
         val colsonWheelRadius = Units.inchesToMeters(2.0)
-        val theoreticalMaxSpeed = DCMotor.getNEO(1).freeSpeedRadPerSec * driveReduction * colsonWheelRadius
-        val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius // TODO: azimuth encoder issues?
+        val neoFreeSpeed = 5676.0 * Math.PI / 30.0
+        val theoreticalMaxSpeed = neoFreeSpeed * driveReduction * colsonWheelRadius
+        val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius
 
-        val maxSpeed = theoreticalMaxSpeed  // maybe this is a bad idea?
-        val maxAngularSpeed = theoreticalMaxAngularSpeed
+        val maxSpeed = theoreticalMaxSpeed / 2.0 // **** safe testing value
+        val maxAngularSpeed = theoreticalMaxAngularSpeed / 2.0 // ****
         val maxAngularAcceleration = Math.PI / 2.0
+        val maxVoltage: Double = 12.0
 
         // TODO: ************************ CRITICAL TO TUNE vvvvv
         // If the PID values are too slow, they will limit our max speed.
@@ -53,7 +54,7 @@ object Constants {
         // If our turning encoder is 1 rad from where it needs to be,
         // we plug that into turnController and get an output: 0.1 rad/s.
         //
-        // Then we do outputVelocity / maxVelocity * 12.0 to convert
+        // Then we do outputVelocity / maxVelocity * maxVoltage to convert
         // those velocities into voltages (see SwerveModule.drive()).
         fun driveController() = PIDController(0.1, 0.0, 0.01)
         fun turnController()  = ProfiledPIDController(0.1, 0.0, 0.01,
