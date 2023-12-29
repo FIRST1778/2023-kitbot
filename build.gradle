@@ -1,20 +1,16 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2023.3.2"
-    id "org.jetbrains.kotlin.jvm" version "1.8.0"
+    id "org.jetbrains.kotlin.jvm" version "1.9.20"
+    id "edu.wpi.first.GradleRIO" version "2024.1.1-beta-4"
+    id "idea"
 }
 
-def javaVersion = JavaVersion.VERSION_11
+def javaVersion = JavaVersion.VERSION_17
 sourceCompatibility = javaVersion
 targetCompatibility = javaVersion
-
-compileKotlin {
-    kotlinOptions.jvmTarget = javaVersion.toString()
-}
-
-compileTestKotlin {
-    kotlinOptions.jvmTarget = javaVersion.toString()
-}
 
 def ROBOT_MAIN_CLASS = "org.chillout1778.Main"
 
@@ -34,8 +30,7 @@ deploy {
                 // First part is artifact name, 2nd is artifact type
                 // getTargetTypeClass is a shortcut to get the class type using a string
 
-                frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
-                }
+                frcJava(getArtifactTypeClass('FRCJavaArtifact')) {}
 
                 // Static files artifact
                 frcStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
@@ -52,15 +47,24 @@ def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 // Set to true to use debug for JNI.
 wpi.java.debugJni = false
 
-// Set this to true to enable desktop support.
-def includeDesktopSupport = false
+// Set this to true to enable desktop support
 
-// Defining my dependencies. In this case, WPILib (+ friends), and vendor libraries.
-// Also defines JUnit 5.
+def includeDesktopSupport = true
+
+
+repositories {
+    maven { url "https://jitpack.io" }
+    mavenCentral()
+//    mavenLocal()
+}
+
+
+
 dependencies {
 
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
+
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
@@ -76,13 +80,28 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.9.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    testImplementation platform("org.junit:junit-bom:5.8.2")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.junit.jupiter:junit-jupiter-params"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+
+//    ksp "com.github.FIRST1778:FalconLibrary:$falconLibraryVersion"
+
+
 }
 
-test {
+kotlin {
+    sourceSets {
+        main.kotlin.srcDirs += 'build/generated/ksp/main/kotlin'
+        test.kotlin.srcDirs += 'build/generated/ksp/test/kotlin'
+    }
+    compilerOptions {
+        apiVersion = KotlinVersion.KOTLIN_1_9
+        jvmTarget = JvmTarget.JVM_17
+    }
+}
+
+test{
     useJUnitPlatform()
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 }
@@ -100,26 +119,31 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-repositories {
-    mavenCentral()
-}
-
 // Configure jar and deploy tasks
 deployArtifact.jarTask = jar
 wpi.java.configureExecutableTasks(jar)
 wpi.java.configureTestTasks(test)
 
-// Configure string concat to always inline compile
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
+    // Configure string concat to always inline compile
     options.compilerArgs.add '-XDstringConcat=inline'
 }
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "11"
+
+idea {
+    project {
+        // The project.sourceCompatibility setting is not always picked up, so we set explicitly
+        languageLevel = javaVersion
+    }
+    module {
+        // Improve development experience (and IDEA's capabilities) by having source & javadoc attached
+        downloadJavadoc = true
+        downloadSources = true
+//        sourceDirs = sourceDirs + file('build/generated/ksp/main/kotlin') // or tasks["kspKotlin"].destination
+//        testSourceDirs = testSourceDirs + file('build/generated/ksp/test/kotlin')
+//        generatedSourceDirs = generatedSourceDirs + file('build/generated/ksp/main/kotlin') + file('build/generated/ksp/test/kotlin')
     }
 }
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "11"
+
+    wrapper {
+        gradleVersion = "8.4"
     }
-}

@@ -123,7 +123,7 @@ object Constants {
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
-w
+
         /* Front Right Module - Module 1 */
         object Mod1 {
             //TODO: This must be tuned to specific robot
