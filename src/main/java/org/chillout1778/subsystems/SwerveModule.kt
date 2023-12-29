@@ -108,7 +108,7 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
             else InvertedValue.CounterClockwise_Positive
         config.MotorOutput.NeutralMode = (Constants.Swerve.driveNeutralMode)
         mDriveMotor.configurator.apply(config)
-        mDriveMotor.setRotorPosition(0.0)
+        mDriveMotor.setPosition(0.0)
     }
 
     val state: SwerveModuleState

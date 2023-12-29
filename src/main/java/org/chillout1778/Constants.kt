@@ -30,7 +30,7 @@ object Constants {
     }
 
     object Swerve {
-        const val pigeonID = 1
+        const val pigeonID = 21
         const val invertGyro = false // Always ensure Gyro is CCW+ CW-
 
 
@@ -118,18 +118,18 @@ object Constants {
             //TODO: This must be tuned to specific robot
             const val driveMotorID = 1
             const val angleMotorID = 2
-            const val canCoderID = 1
+            const val canCoderID = 11
             val angleOffset = Rotation2d.fromDegrees(0.0)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
-
+w
         /* Front Right Module - Module 1 */
         object Mod1 {
             //TODO: This must be tuned to specific robot
             const val driveMotorID = 3
             const val angleMotorID = 4
-            const val canCoderID = 2
+            const val canCoderID = 12
             val angleOffset = Rotation2d.fromDegrees(0.0)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
@@ -140,7 +140,7 @@ object Constants {
             //TODO: This must be tuned to specific robot
             const val driveMotorID = 5
             const val angleMotorID = 6
-            const val canCoderID = 3
+            const val canCoderID = 13
             val angleOffset = Rotation2d.fromDegrees(0.0)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
@@ -151,7 +151,7 @@ object Constants {
             //TODO: This must be tuned to specific robot
             const val driveMotorID = 7
             const val angleMotorID = 8
-            const val canCoderID = 4
+            const val canCoderID = 14
             val angleOffset = Rotation2d.fromDegrees(0.0)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }

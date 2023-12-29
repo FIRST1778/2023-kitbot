@@ -15,13 +15,13 @@ class RobotContainer {
     private val driver = Joystick(0)
 
     /* Drive Controls */
-    private val translationAxis = XboxController.Axis.kLeftY.value
-    private val strafeAxis = XboxController.Axis.kLeftX.value
-    private val rotationAxis = XboxController.Axis.kRightX.value
+    private val translationAxis = 2
+    private val strafeAxis = 3
+    private val rotationAxis = 0
 
     /* Driver Buttons */
     private val zeroGyro = JoystickButton(driver, XboxController.Button.kY.value)
-    private val robotCentric = JoystickButton(driver, XboxController.Button.kLeftBumper.value)
+    private val robotCentric = false
 
     /* Subsystems */
     private val s_Swerve: Swerve = Swerve()
@@ -34,7 +34,7 @@ class RobotContainer {
                 { -driver.getRawAxis(translationAxis) },
                 { -driver.getRawAxis(strafeAxis) },
                 { -driver.getRawAxis(rotationAxis) }
-            ) { robotCentric.asBoolean }
+            ) { robotCentric }
         )
 
         // Configure the button bindings
@@ -47,7 +47,6 @@ class RobotContainer {
      */
     private fun configureButtonBindings() {
         /* Driver Buttons */
-        zeroGyro.onTrue(InstantCommand({ s_Swerve.zeroGyro() }))
     }
 
     val autonomousCommand: Command
