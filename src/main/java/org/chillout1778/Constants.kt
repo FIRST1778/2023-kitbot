@@ -28,7 +28,7 @@ object Constants {
         val moduleXY = Units.inchesToMeters(11.75)
         val moduleRadius = moduleXY * sqrt(2.0)
 
-        // The gear ratio for an MK4i L2 swerve module, about 6.75 : 1.
+        // The gear ratio for an MK4i L2 swerve module, about 1 : 6.75.
         // We multiply by "(driving gear teeth) / (driven gear teeth)"
         // for each stage of the gearbox.
         // https://www.swervedrivespecialties.com/products/mk4i-swerve-module
@@ -37,6 +37,8 @@ object Constants {
         val neoFreeSpeed = 5676.0 * Math.PI / 30.0
         val theoreticalMaxSpeed = neoFreeSpeed * driveReduction * colsonWheelRadius
         val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius
+        // The above math is also contained in swerve.py in the root
+        // of the repository.
 
         val maxSpeed = theoreticalMaxSpeed / 2.0 // **** safe testing value
         val maxAngularSpeed = theoreticalMaxAngularSpeed / 2.0 // ****
