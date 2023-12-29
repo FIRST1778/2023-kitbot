@@ -118,18 +118,18 @@ object Constants {
             //TODO: This must be tuned to specific robot
             const val driveMotorID = 1
             const val angleMotorID = 2
-            const val canCoderID = 11
+            const val canCoderID = 10
             val angleOffset = Rotation2d.fromDegrees(0.0)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
-w
+
         /* Front Right Module - Module 1 */
         object Mod1 {
             //TODO: This must be tuned to specific robot
             const val driveMotorID = 3
             const val angleMotorID = 4
-            const val canCoderID = 12
+            const val canCoderID = 11
             val angleOffset = Rotation2d.fromDegrees(0.0)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
