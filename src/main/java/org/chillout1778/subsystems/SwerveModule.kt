@@ -11,6 +11,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import org.chillout1778.CTREConfigs
 import org.chillout1778.Constants
 import org.chillout1778.Robot
 import org.chillout1778.lib.NEO
@@ -90,12 +91,18 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     }
 
     private fun configAngleEncoder() {
-
+        angleEncoder.configurator.apply(
+            CTREConfigs.swerveCanCoderConfig
+        )
     }
 
     private fun configAngleMotor() {
         mAngleMotor.inverted = Constants.Swerve.angleMotorInvert
         mAngleMotor.neutralMode = Constants.Swerve.angleNeutralMode
+        mAngleMotor.controller.p = Constants.Swerve.angleKP
+        mAngleMotor.controller.i = Constants.Swerve.angleKI
+        mAngleMotor.controller.d = Constants.Swerve.angleKD
+        mAngleMotor.controller.ff = Constants.Swerve.angleKF
         resetToAbsolute()
     }
 

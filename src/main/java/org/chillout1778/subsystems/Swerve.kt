@@ -12,7 +12,7 @@ import org.chillout1778.Constants
 import org.chillout1778.subsystems.SwerveModule
 
 
-class Swerve : SubsystemBase() {
+object Swerve : SubsystemBase() {
     var swerveOdometry: SwerveDriveOdometry
     var mSwerveMods: Array<SwerveModule>
     var gyro: Pigeon2
@@ -106,4 +106,5 @@ class Swerve : SubsystemBase() {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.state.speedMetersPerSecond)
         }
     }
+
 }

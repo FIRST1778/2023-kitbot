@@ -23,19 +23,14 @@ class RobotContainer {
     private val zeroGyro = JoystickButton(driver, XboxController.Button.kY.value)
     private val robotCentric = false
 
-    /* Subsystems */
-    private val s_Swerve: Swerve = Swerve()
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
-        s_Swerve.setDefaultCommand(
-            TeleopSwerve(
-                s_Swerve,
-                { -driver.getRawAxis(translationAxis) },
-                { -driver.getRawAxis(strafeAxis) },
-                { -driver.getRawAxis(rotationAxis) }
-            ) { robotCentric }
-        )
+        Swerve.defaultCommand = TeleopSwerve(
+            { -driver.getRawAxis(translationAxis) },
+            { -driver.getRawAxis(strafeAxis) },
+            { -driver.getRawAxis(rotationAxis) }
+        ) { robotCentric }
 
         // Configure the button bindings
         configureButtonBindings()

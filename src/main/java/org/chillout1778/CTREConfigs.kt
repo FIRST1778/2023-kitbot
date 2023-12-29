@@ -7,7 +7,7 @@ import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
 
 
-class CTREConfigs {
+object CTREConfigs {
     var swerveAngleFXConfig: TalonFXConfiguration
     var swerveDriveFXConfig: TalonFXConfiguration
     var swerveCanCoderConfig: CANcoderConfiguration
