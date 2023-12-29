@@ -57,5 +57,8 @@ object Constants {
         // motor characterizations.
         fun driveFeedforward() = SimpleMotorFeedforward(0.0, 0.0, 0.0)
         fun turnFeedforward()  = SimpleMotorFeedforward(0.0, 0.0, 0.0)
+
+        val maxDriveVoltage = 12.0
+        val maxTurnVoltage = 12.0
     }
 }

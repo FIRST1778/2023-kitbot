@@ -30,6 +30,8 @@ class SwerveModule(
     private val driveFeedforward: SimpleMotorFeedforward = Constants.Swerve.driveFeedforward()
     private val turnFeedforward:  SimpleMotorFeedforward = Constants.Swerve.turnFeedforward()
 
+    // TODO: Voltage compensation???
+
     init {
         driveMotor.setInverted(driveInverted)
         turnMotor.setInverted(true)
@@ -86,13 +88,11 @@ class SwerveModule(
         // TODO: My understanding from last year's code is that
         // all modules have azimuth inversion and half have
         // drive inversion.
-        driveMotor.setVoltage(
-            drivePID.calculate(driveMotor.encoder.velocity, state.speedMetersPerSecond)
+        val driveVoltage = drivePID.calculate(driveMotor.encoder.velocity, state.speedMetersPerSecond)
             + driveFeedforward.calculate(state.speedMetersPerSecond)
-        )
-        turnMotor.setVoltage(
-            turnPID.calculate(turnMotor.encoder.position, state.angle.radians)
+        val turnVoltage = turnPID.calculate(turnMotor.encoder.position, state.angle.radians)
             + turnFeedforward.calculate(turnPID.setpoint.velocity)
-        )
+        driveMotor.setVoltage(Util.clamp(driveVoltage, Constants.Swerve.maxDriveVoltage))
+        turnMotor.setVoltage(Util.clamp(turnVoltage, Constants.Swerve.maxTurnVoltage))
     }
 }

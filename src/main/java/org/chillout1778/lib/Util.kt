@@ -23,5 +23,7 @@ class Util {
             cancoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition)
             return cancoder
         }
+
+        fun clamp(n: Double, range: Double) = Math.min(range, Math.max(-range, n))
     }
 }
