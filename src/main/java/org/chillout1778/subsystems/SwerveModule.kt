@@ -38,11 +38,6 @@ class SwerveModule(
         resetRelative()
     }
 
-    private fun resetRelative() {
-        System.out.printf("Resetting %s swerve encoder from absolute\n", name)
-        turnMotor.encoder.position = turnCanCoder.position
-    }
-    
     val state get() = SwerveModuleState(
         driveMotor.encoder.velocity, Rotation2d(turnMotor.encoder.position)
     )
@@ -52,20 +47,25 @@ class SwerveModule(
 
     private var turnStationaryTicks: Int = 0
 
-    fun update(unoptimizedState: SwerveModuleState) {
+    private fun resetRelative() {
+        System.out.printf("Resetting %s swerve encoder from absolute\n", name)
+        turnMotor.encoder.position = turnCanCoder.position
+        turnStationaryTicks = 0
+    }
+    
+    fun maybeResetRelative() {
         // Count how many ticks this turn motor has been stationary;
         // if we've waited long enough, we take this as a cue to reset
         // relative encoders back to absolute.
         if (turnMotor.encoder.velocity < 0.3) {
             turnStationaryTicks += 1
-        } else {
-            turnStationaryTicks = 0
         }
         if (turnStationaryTicks > 250) {
-            turnStationaryTicks = 0
             resetRelative()
         }
+    }
 
+    fun drive(unoptimizedState: SwerveModuleState) {
         // Optimize the swerve module state (i.e., drive velocity
         // and turn position) so that we never turn more than 90 degrees.
         val rotation = Rotation2d(turnMotor.encoder.position)

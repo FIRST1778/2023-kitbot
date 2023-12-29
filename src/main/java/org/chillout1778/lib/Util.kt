@@ -1,10 +1,11 @@
 package org.chillout1778.lib
 
-import com.revrobotics.CANSparkMax
-import com.revrobotics.CANSparkMaxLowLevel
 import com.ctre.phoenix.sensors.CANCoder
 import com.ctre.phoenix.sensors.CANCoderConfiguration
+import com.ctre.phoenix.sensors.SensorInitializationStrategy
 import com.ctre.phoenix.sensors.SensorTimeBase
+import com.revrobotics.CANSparkMax
+import com.revrobotics.CANSparkMaxLowLevel
 
 class Util {
     companion object {
@@ -19,6 +20,7 @@ class Util {
             // TODO: start in absolute mode
             val cancoder = CANCoder(id)
             cancoder.configFeedbackCoefficient(2*Math.PI/4096.0, "rad", SensorTimeBase.PerSecond)
+            cancoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition)
             return cancoder
         }
     }

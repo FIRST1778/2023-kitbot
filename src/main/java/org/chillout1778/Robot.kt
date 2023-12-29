@@ -27,6 +27,6 @@ object Robot : TimedRobot() {
     }
 
     override fun disabledInit() {
-        Swerve.disable()
+        //Swerve.disable()
     }
 }

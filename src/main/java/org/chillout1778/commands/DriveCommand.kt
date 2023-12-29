@@ -36,6 +36,6 @@ class DriveCommand: CommandBase() {
     override fun cancel() {
         // Duplicated in Robot.kt disabledInit();
         // better to be safe than sorry.
-        Swerve.disable()
+        //Swerve.disable()
     }
 }

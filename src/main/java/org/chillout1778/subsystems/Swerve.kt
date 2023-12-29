@@ -68,7 +68,7 @@ object Swerve: SubsystemBase() {
         modules.map{it.position}.toTypedArray()
     )
 
-    fun update(x: Double, y: Double, rot: Double) {
+    fun drive(x: Double, y: Double, rot: Double) {
         // TODO: use ChassisSpeeds.discretize() once we have
         // WPILib 2024; this accounts for setting motor outputs
         // every 20ms instead of continuously.
@@ -83,18 +83,13 @@ object Swerve: SubsystemBase() {
         SwerveDriveKinematics.desaturateWheelSpeeds(states,
             Constants.Swerve.maxSpeed)
 
-        for (i in states.indices) {
-            modules[i].update(states[i])
-        }
+        for (i in states.indices)
+            modules[i].drive(states[i])
 
         odometry.update(
             Gyro.rotation,
             modules.map{it.position}.toTypedArray()
         )
-    }
-
-    fun disable() {
-        // TODO: We need to hard brake here
     }
 }
 
