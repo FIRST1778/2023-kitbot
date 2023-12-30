@@ -119,7 +119,7 @@ object Constants {
             const val driveMotorID = 1
             const val angleMotorID = 2
             const val canCoderID = 10
-            val angleOffset = Rotation2d.fromDegrees(0.0)
+            val angleOffset = Rotation2d.fromDegrees(335.8)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
@@ -130,7 +130,7 @@ object Constants {
             const val driveMotorID = 3
             const val angleMotorID = 4
             const val canCoderID = 11
-            val angleOffset = Rotation2d.fromDegrees(0.0)
+            val angleOffset = Rotation2d.fromDegrees(161.3)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
@@ -141,7 +141,7 @@ object Constants {
             const val driveMotorID = 5
             const val angleMotorID = 6
             const val canCoderID = 13
-            val angleOffset = Rotation2d.fromDegrees(0.0)
+            val angleOffset = Rotation2d.fromDegrees(161.3)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 
@@ -152,7 +152,7 @@ object Constants {
             const val driveMotorID = 7
             const val angleMotorID = 8
             const val canCoderID = 14
-            val angleOffset = Rotation2d.fromDegrees(0.0)
+            val angleOffset = Rotation2d.fromDegrees(15.6)
             val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
         }
 

@@ -1,23 +1,24 @@
 package org.chillout1778.subsystems
 
 
+import com.ctre.phoenix6.configs.MagnetSensorConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
-import com.ctre.phoenix6.configs.TalonFXConfigurator
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
+import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.signals.SensorDirectionValue
 import com.revrobotics.CANSparkMax
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import org.chillout1778.CTREConfigs
 import org.chillout1778.Constants
 import org.chillout1778.Robot
 import org.chillout1778.lib.NEO
 import org.chillout1778.lib.math.Conversions
-import org.chillout1778.lib.util.CTREModuleState
 import org.chillout1778.lib.util.SwerveModuleConstants
+import kotlin.math.PI
 
 
 class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants) {
@@ -43,10 +44,13 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
         lastAngle = state.angle
     }
 
-    fun setDesiredState(desiredState: SwerveModuleState, isOpenLoop: Boolean) {
-        /* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
+    fun setDesiredState(
+        desiredState: SwerveModuleState,
+        isOpenLoop: Boolean
+    ) {/* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
         var desiredState: SwerveModuleState = desiredState
-        desiredState = CTREModuleState.optimize(desiredState, state.angle)
+        desiredState = SwerveModuleState.optimize(desiredState, state.angle)
+//        desiredState = CTREModuleState.optimize(desiredState, state.angle)
         setAngle(desiredState)
         setSpeed(desiredState, isOpenLoop)
     }
@@ -69,13 +73,9 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     }
 
     private fun setAngle(desiredState: SwerveModuleState) {
-        val angle =
-            if (Math.abs(desiredState.speedMetersPerSecond) <= Constants.Swerve.maxSpeed * 0.01)
-                lastAngle
-            else
-                desiredState.angle
-
-        mAngleMotor.controller.setReference(angle.degrees, CANSparkMax.ControlType.kPosition)
+        val angle = if (Math.abs(desiredState.speedMetersPerSecond) <= Constants.Swerve.maxSpeed * 0.01) lastAngle
+        else desiredState.angle
+        mAngleMotor.controller.setReference(angle.radians, CANSparkMax.ControlType.kPosition)
         lastAngle = angle
     }
 
@@ -84,15 +84,22 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
             mAngleMotor.position
         )
     val canCoder: Rotation2d
-        get() = Rotation2d.fromDegrees(angleEncoder.absolutePosition.value * 360.0)
+        get() = Rotation2d.fromDegrees(angleEncoder.absolutePosition.valueAsDouble * 360.0)
 
     fun resetToAbsolute() {
-        mAngleMotor.position = canCoder.degrees - angleOffset.degrees
+
+        mAngleMotor.position = canCoder.radians
     }
 
     private fun configAngleEncoder() {
         angleEncoder.configurator.apply(
-            CTREConfigs.swerveCanCoderConfig
+            MagnetSensorConfigs().withMagnetOffset(
+                -angleOffset.degrees/360.0 // TODO: Figure out wtf this needs as input
+            ).withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
+                .withSensorDirection(
+                    if (Constants.Swerve.canCoderInvert) SensorDirectionValue.Clockwise_Positive
+                    else SensorDirectionValue.CounterClockwise_Positive
+                )
         )
     }
 
@@ -103,6 +110,11 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
         mAngleMotor.controller.i = Constants.Swerve.angleKI
         mAngleMotor.controller.d = Constants.Swerve.angleKD
         mAngleMotor.controller.ff = Constants.Swerve.angleKF
+        mAngleMotor.motor.encoder.positionConversionFactor =
+            (1.0 / Constants.Swerve.chosenModule.angleGearRatio) * 2.0 * PI
+        mAngleMotor.motor.encoder.velocityConversionFactor =
+            (1.0 / Constants.Swerve.chosenModule.angleGearRatio) * Math.PI / 30.0 // radians
+        mAngleMotor.motor.burnFlash()
         resetToAbsolute()
     }
 
@@ -110,9 +122,8 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
         mDriveMotor.configurator.apply(TalonFXConfiguration())
         mDriveMotor.configurator.apply(Robot.ctreConfigs!!.swerveDriveFXConfig)
         val config = TalonFXConfiguration()
-        config.MotorOutput.Inverted =
-            if(Constants.Swerve.driveMotorInvert) InvertedValue.Clockwise_Positive
-            else InvertedValue.CounterClockwise_Positive
+        config.MotorOutput.Inverted = if (Constants.Swerve.driveMotorInvert) InvertedValue.Clockwise_Positive
+        else InvertedValue.CounterClockwise_Positive
         config.MotorOutput.NeutralMode = (Constants.Swerve.driveNeutralMode)
         mDriveMotor.configurator.apply(config)
         mDriveMotor.setPosition(0.0)
@@ -121,21 +132,15 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     val state: SwerveModuleState
         get() = SwerveModuleState(
             Conversions.falconToMPS(
-                mDriveMotor.velocity.value,
-                Constants.Swerve.wheelCircumference,
-                Constants.Swerve.driveGearRatio
-            ),
-            angle
+                mDriveMotor.velocity.value, Constants.Swerve.wheelCircumference, Constants.Swerve.driveGearRatio
+            ), angle
         )
     val position: SwerveModulePosition
         get() {
             return SwerveModulePosition(
                 Conversions.falconToMeters(
-                    mDriveMotor.position.value,
-                    Constants.Swerve.wheelCircumference,
-                    Constants.Swerve.driveGearRatio
-                ),
-                angle
+                    mDriveMotor.position.value, Constants.Swerve.wheelCircumference, Constants.Swerve.driveGearRatio
+                ), angle
             )
         }
 }
