@@ -47,21 +47,12 @@ object Constants {
 
         // TODO: ************************ CRITICAL TO TUNE vvvvv
         // If the PID values are too slow, they will limit our max speed.
-        // These map error to velocity.
-        //
-        // If we are driving at 0.1 m/s and want to drive at 1 m/s, the
-        // velocity error is 0.9.  We calculate an output using the
-        // driveController: 0.09 m/s.  (This is purposely very slow).
-        //
-        // If our turning encoder is 1 rad from where it needs to be,
-        // we plug that into turnController and get an output: 0.1 rad/s.
-        //
-        // Then we do outputVelocity / maxVelocity * maxVoltage to convert
-        // those velocities into voltages (see SwerveModule.drive()).
-        fun driveController() = PIDController(0.1, 0.0, 0.01)
-        fun turnController()  = ProfiledPIDController(0.1, 0.0, 0.01,
+        // These map error to voltage.
+        fun driveController() = PIDController(5.0, 0.0, 0.05)
+        fun turnController()  = ProfiledPIDController(1.0, 0.0, 0.01,
             TrapezoidProfile.Constraints(
                 maxAngularSpeed, maxAngularAcceleration
+                // TODO: correct now that we control velocity?
             )
         )
         fun driveFeedforward() = SimpleMotorFeedforward(0.0, 0.0, 0.0)

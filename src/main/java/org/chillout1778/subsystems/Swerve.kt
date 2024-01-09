@@ -10,14 +10,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.chillout1778.commands.DriveCommand
 import org.chillout1778.Constants
 import org.chillout1778.subsystems.SwerveModule
+import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.hardware.Pigeon2
 
 // Swerve math resources:
 // https://dominik.win/blog/programming-swerve-drive/
 // https://www.chiefdelphi.com/uploads/default/original/3X/e/f/ef10db45f7d65f6d4da874cd26db294c7ad469bb.pdf
 
 object Swerve: SubsystemBase() {
+    val gyro = Pigeon2(21)
+
     init {
-        setDefaultCommand(DriveCommand())
+        //setDefaultCommand(DriveCommand())
+        gyro.reset()
     }
 
     private fun moduleTranslation(x: Double, y: Double) = 
@@ -30,7 +35,7 @@ object Swerve: SubsystemBase() {
             driveMotorId = 6,
             turnMotorId = 5,
             turnCanCoderId = 10,
-            driveInverted = true,
+            driveInversion = InvertedValue.CounterClockwise_Positive,
             translation = moduleTranslation(1.0, 1.0)
         ),
         SwerveModule(
@@ -39,7 +44,7 @@ object Swerve: SubsystemBase() {
             driveMotorId = 8,
             turnMotorId = 7,
             turnCanCoderId = 11,
-            driveInverted = false,
+            driveInversion = InvertedValue.Clockwise_Positive,
             translation = moduleTranslation(1.0, -1.0)
         ),
         SwerveModule(
@@ -48,7 +53,7 @@ object Swerve: SubsystemBase() {
             driveMotorId = 2,
             turnMotorId = 1,
             turnCanCoderId = 12,
-            driveInverted = false,
+            driveInversion = InvertedValue.Clockwise_Positive,
             translation = moduleTranslation(-1.0, -1.0)
         ),
         SwerveModule(
@@ -57,7 +62,7 @@ object Swerve: SubsystemBase() {
             driveMotorId = 4,
             turnMotorId = 3,
             turnCanCoderId = 13,
-            driveInverted = true,
+            driveInversion = InvertedValue.CounterClockwise_Positive,
             translation = moduleTranslation(-1.0, 1.0)
         ),
     )
@@ -69,7 +74,7 @@ object Swerve: SubsystemBase() {
     // TODO: double check
     val odometry = SwerveDriveOdometry(
         kinematics,
-        Gyro.rotation,
+        gyro.rotation2d,
         modules.map{it.position}.toTypedArray()
     )
 
@@ -79,7 +84,7 @@ object Swerve: SubsystemBase() {
         // every 20ms instead of continuously.
         val states: Array<SwerveModuleState> = kinematics.toSwerveModuleStates(
             ChassisSpeeds.fromFieldRelativeSpeeds(
-                x, y, rot, Gyro.rotation
+                x, y, rot, gyro.rotation2d
             )
         )
 
@@ -92,7 +97,7 @@ object Swerve: SubsystemBase() {
             modules[i].drive(states[i])
 
         odometry.update(
-            Gyro.rotation,
+            gyro.rotation2d,
             modules.map{it.position}.toTypedArray()
         )
     }
