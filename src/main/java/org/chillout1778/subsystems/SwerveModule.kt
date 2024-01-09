@@ -21,7 +21,7 @@ import org.chillout1778.lib.util.SwerveModuleConstants
 import kotlin.math.PI
 
 
-class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants) {
+class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants, var driveMotorInvert : Boolean) {
     private val angleOffset: Rotation2d
     private var lastAngle: Rotation2d
     private val mAngleMotor: NEO
@@ -72,9 +72,19 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
         }
     }
 
+    private fun angleWrap(rot: Rotation2d): Rotation2d {
+        var rad = rot.radians % (2.0*Math.PI)
+        if (rad < 0.0) {
+            rad += 2.0*Math.PI
+        }
+        return Rotation2d.fromRadians(rad)
+    }
+
     private fun setAngle(desiredState: SwerveModuleState) {
-        val angle = if (Math.abs(desiredState.speedMetersPerSecond) <= Constants.Swerve.maxSpeed * 0.01) lastAngle
+        var angle = if (Math.abs(desiredState.speedMetersPerSecond) <= Constants.Swerve.maxSpeed * 0.01) lastAngle
         else desiredState.angle
+        angle = angleWrap(angle)
+        println(angle)
         mAngleMotor.controller.setReference(angle.radians, CANSparkMax.ControlType.kPosition)
         lastAngle = angle
     }
@@ -94,7 +104,7 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     private fun configAngleEncoder() {
         angleEncoder.configurator.apply(
             MagnetSensorConfigs().withMagnetOffset(
-                -angleOffset.degrees/360.0 // TODO: Figure out wtf this needs as input
+                -angleOffset.degrees / 360.0 // TODO: Figure out wtf this needs as input
             ).withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
                 .withSensorDirection(
                     if (Constants.Swerve.canCoderInvert) SensorDirectionValue.Clockwise_Positive
@@ -122,7 +132,7 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
         mDriveMotor.configurator.apply(TalonFXConfiguration())
         mDriveMotor.configurator.apply(Robot.ctreConfigs!!.swerveDriveFXConfig)
         val config = TalonFXConfiguration()
-        config.MotorOutput.Inverted = if (Constants.Swerve.driveMotorInvert) InvertedValue.Clockwise_Positive
+        config.MotorOutput.Inverted = if (driveMotorInvert) InvertedValue.Clockwise_Positive
         else InvertedValue.CounterClockwise_Positive
         config.MotorOutput.NeutralMode = (Constants.Swerve.driveNeutralMode)
         mDriveMotor.configurator.apply(config)

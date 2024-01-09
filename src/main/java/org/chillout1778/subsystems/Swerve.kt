@@ -21,10 +21,10 @@ object Swerve : SubsystemBase() {
         gyro = Pigeon2(Constants.Swerve.pigeonID)
         zeroGyro()
         mSwerveMods = arrayOf<SwerveModule>(
-            SwerveModule(0, Constants.Swerve.Mod0.constants),
-            SwerveModule(1, Constants.Swerve.Mod1.constants),
-            SwerveModule(2, Constants.Swerve.Mod2.constants),
-            SwerveModule(3, Constants.Swerve.Mod3.constants)
+            SwerveModule(0, Constants.Swerve.Mod0.constants, true),
+            SwerveModule(1, Constants.Swerve.Mod1.constants, false),
+            SwerveModule(2, Constants.Swerve.Mod2.constants, true),
+            SwerveModule(3, Constants.Swerve.Mod3.constants, false)
         )
 
         /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
