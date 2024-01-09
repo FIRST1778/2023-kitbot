@@ -1,11 +1,11 @@
 package org.chillout1778.commands
 
-import edu.wpi.first.wpilibj2.command.CommandBase
+import edu.wpi.first.wpilibj2.command.Command
 import org.chillout1778.Constants
 import org.chillout1778.subsystems.Controls
 import org.chillout1778.subsystems.Swerve
 
-class DriveCommand: CommandBase() {
+class DriveCommand: Command() {
     init {
         addRequirements(Swerve)
     }
