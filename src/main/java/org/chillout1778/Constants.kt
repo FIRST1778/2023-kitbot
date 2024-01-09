@@ -1,19 +1,13 @@
 package org.chillout1778
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs
-import com.ctre.phoenix6.signals.NeutralModeValue
-import com.revrobotics.CANSparkMax.IdleMode
-
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.ProfiledPIDController
+import edu.wpi.first.math.controller.SimpleMotorFeedforward
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
-import org.chillout1778.lib.util.COTSFalconSwerveConstants
-import org.chillout1778.lib.util.SwerveModuleConstants
-
+import kotlin.math.sqrt
 
 object Constants {
-
     object Pigeon {
         const val canId = 21
     }
@@ -26,135 +20,42 @@ object Constants {
     object Controls {
         const val driveAxisID = 1
         const val turnAxisID = 4
-        val stickDeadband: Double = 0.02
     }
 
     object Swerve {
-        const val pigeonID = 21
-        const val invertGyro = false // Always ensure Gyro is CCW+ CW-
+        // The swerve modules are located at (11.75,11.75) and its
+        // reflections across the x- and y-axis.
+        val moduleXY = Units.inchesToMeters(11.75)
+        val moduleRadius = moduleXY * sqrt(2.0)
 
+        // The gear ratio for an MK4i L2 swerve module, about 1 : 6.75.
+        // We multiply by "(driving gear teeth) / (driven gear teeth)"
+        // for each stage of the gearbox.
+        // https://www.swervedrivespecialties.com/products/mk4i-swerve-module
+        const val driveReduction = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)
+        val colsonWheelRadius = Units.inchesToMeters(2.0)
+        val neoFreeSpeed = 5676.0 * Math.PI / 30.0
+        val theoreticalMaxSpeed = neoFreeSpeed * driveReduction * colsonWheelRadius
+        val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius
+        // The above math is also contained in swerve.py in the root
+        // of the repository.
 
-        val chosenModule =
-            COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L3)
+        val maxSpeed = theoreticalMaxSpeed / 2.0 // **** safe testing value
+        val maxAngularSpeed = theoreticalMaxAngularSpeed / 2.0 // ****
+        val maxAngularAcceleration = Math.PI / 2.0
+        val maxVoltage: Double = 12.0
 
-        /* Drivetrain Constants */
-        val trackWidth = Units.inchesToMeters(23.5)
-
-        val wheelBase = Units.inchesToMeters(23.5)
-
-        val wheelCircumference = chosenModule.wheelCircumference
-
-        /* Swerve Kinematics
-         * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve */
-        val swerveKinematics = SwerveDriveKinematics(
-            Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-            Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-            Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-            Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+        // TODO: ************************ CRITICAL TO TUNE vvvvv
+        // If the PID values are too slow, they will limit our max speed.
+        // These map error to voltage.
+        fun driveController() = PIDController(5.0, 0.0, 0.05)
+        fun turnController()  = ProfiledPIDController(1.0, 0.0, 0.01,
+            TrapezoidProfile.Constraints(
+                maxAngularSpeed, maxAngularAcceleration
+                // TODO: correct now that we control velocity?
+            )
         )
-
-        /* Module Gear Ratios */
-        val driveGearRatio = chosenModule.driveGearRatio
-        val angleGearRatio = chosenModule.angleGearRatio
-
-        /* Motor Inverts */
-        val angleMotorInvert = chosenModule.angleMotorInvert
-        val driveMotorInvert = chosenModule.driveMotorInvert
-
-        /* Angle Encoder Invert */
-        val canCoderInvert = chosenModule.canCoderInvert
-
-        /* Swerve Current Limiting */
-        const val angleContinuousCurrentLimit = 25
-        const val anglePeakCurrentLimit = 40.0
-        const val anglePeakCurrentDuration = 0.1
-        const val angleEnableCurrentLimit = true
-
-        const val driveContinuousCurrentLimit = 35
-        const val drivePeakCurrentLimit = 60.0
-        const val drivePeakCurrentDuration = 0.1
-        const val driveEnableCurrentLimit = true
-
-        /* These values are used by the drive falcon to ramp in open loop and closed loop driving.
-         * We found a small open loop ramp (0.25) helps with tread wear, tipping, etc */
-        const val openLoopRamp = 0.25
-        const val closedLoopRamp = 0.0
-
-        /* Angle Motor PID Values */
-        val angleKP = chosenModule.angleKP
-        val angleKI = chosenModule.angleKI
-        val angleKD = chosenModule.angleKD
-        val angleKF = chosenModule.angleKF
-
-        /* Drive Motor PID Values */
-        const val driveKP = 0.05 //TODO: This must be tuned to specific robot
-
-        const val driveKI = 0.0
-        const val driveKD = 0.0
-        const val driveKF = 0.0
-
-        /* Drive Motor Characterization Values
-         * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
-        const val driveKS = 0.32 / 12 //TODO: This must be tuned to specific robot
-
-        const val driveKV = 1.51 / 12
-        const val driveKA = 0.27 / 12
-
-        /* Swerve Profiling Values */
-        /* Swerve Profiling Values */
-        /** Meters per Second  */
-        const val maxSpeed = 4.5 //TODO: This must be tuned to specific robot
-
-        /** Radians per Second  */
-        const val maxAngularVelocity = 10.0 //TODO: This must be tuned to specific robot
-
-
-        /* Neutral Modes */
-        val angleNeutralMode: IdleMode = IdleMode.kCoast
-        val driveNeutralMode: NeutralModeValue = NeutralModeValue.Brake
-
-        /* Module Specific Constants */ /* Front Left Module - Module 0 */
-        object Mod0 {
-            //TODO: This must be tuned to specific robot
-            const val driveMotorID = 1
-            const val angleMotorID = 2
-            const val canCoderID = 10
-            val angleOffset = Rotation2d.fromDegrees(335.8)
-            val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
-        }
-
-
-        /* Front Right Module - Module 1 */
-        object Mod1 {
-            //TODO: This must be tuned to specific robot
-            const val driveMotorID = 3
-            const val angleMotorID = 4
-            const val canCoderID = 11
-            val angleOffset = Rotation2d.fromDegrees(161.3)
-            val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
-        }
-
-
-        /* Back Left Module - Module 2 */
-        object Mod2 {
-            //TODO: This must be tuned to specific robot
-            const val driveMotorID = 5
-            const val angleMotorID = 6
-            const val canCoderID = 13
-            val angleOffset = Rotation2d.fromDegrees(161.3)
-            val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
-        }
-
-
-        /* Back Right Module - Module 3 */
-        object Mod3 {
-            //TODO: This must be tuned to specific robot
-            const val driveMotorID = 7
-            const val angleMotorID = 8
-            const val canCoderID = 14
-            val angleOffset = Rotation2d.fromDegrees(15.6)
-            val constants = SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset)
-        }
-
+        fun driveFeedforward() = SimpleMotorFeedforward(0.0, 0.0, 0.0)
+        fun turnFeedforward()  = SimpleMotorFeedforward(0.0, 0.0, 0.0)
     }
 }

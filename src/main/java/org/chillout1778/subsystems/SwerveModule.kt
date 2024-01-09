@@ -1,158 +1,121 @@
 package org.chillout1778.subsystems
 
-
-import com.ctre.phoenix6.configs.MagnetSensorConfigs
-import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
 import com.ctre.phoenix6.signals.InvertedValue
-import com.ctre.phoenix6.signals.SensorDirectionValue
+import com.ctre.phoenix6.configs.MotorOutputConfigs
+import com.ctre.phoenix6.configs.MagnetSensorConfigs
 import com.revrobotics.CANSparkMax
+import edu.wpi.first.math.controller.PIDController
+import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Rotation2d
+import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.trajectory.TrapezoidProfile
+import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.chillout1778.Constants
-import org.chillout1778.Robot
-import org.chillout1778.lib.NEO
-import org.chillout1778.lib.math.Conversions
-import org.chillout1778.lib.util.SwerveModuleConstants
-import kotlin.math.PI
+import org.chillout1778.lib.Util
 
+class SwerveModule(
+        val name: String,
+        driveMotorId: Int, turnMotorId: Int, turnCanCoderId: Int,
+        val encoderOffset: Double,
+        val driveInversion: InvertedValue,
+        val translation: Translation2d,
+) {
+    private val driveMotor = TalonFX(driveMotorId)
+    private val turnMotor: CANSparkMax  = Util.neo(turnMotorId)
+    private val turnCanCoder = CANcoder(turnCanCoderId)
 
-class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants, var driveMotorInvert : Boolean) {
-    private val angleOffset: Rotation2d
-    private var lastAngle: Rotation2d
-    private val mAngleMotor: NEO
-    private val mDriveMotor: TalonFX
-    private val angleEncoder: CANcoder
-    private var feedforward: SimpleMotorFeedforward =
-        SimpleMotorFeedforward(Constants.Swerve.driveKS, Constants.Swerve.driveKV, Constants.Swerve.driveKA)
+    private val drivePID: PIDController = Constants.Swerve.driveController()
+    private val turnPID: ProfiledPIDController = Constants.Swerve.turnController()
+    private val driveFeedforward: SimpleMotorFeedforward = Constants.Swerve.driveFeedforward()
+    private val turnFeedforward:  SimpleMotorFeedforward = Constants.Swerve.turnFeedforward()
+
+    // TODO: Voltage compensation???
 
     init {
-        angleOffset = moduleConstants.angleOffset
-
-        /* Angle Encoder Config */angleEncoder = CANcoder(moduleConstants.cancoderID)
-        configAngleEncoder()
-
-        /* Angle Motor Config */mAngleMotor = NEO(moduleConstants.angleMotorID)
-        configAngleMotor()
-
-        /* Drive Motor Config */mDriveMotor = TalonFX(moduleConstants.driveMotorID)
-        configDriveMotor()
-        lastAngle = state.angle
+        driveMotor.configurator.apply(
+            MotorOutputConfigs().withInverted(driveInversion)
+        )
+        turnMotor.setInverted(true)
+        turnCanCoder.configurator.apply(
+            MagnetSensorConfigs().withMagnetOffset(encoderOffset)
+        )
+        turnPID.enableContinuousInput(0.0, 2.0*Math.PI) // TODO: make sure inputs are wrapped to this range
+        resetRelative()
     }
 
-    fun setDesiredState(
-        desiredState: SwerveModuleState,
-        isOpenLoop: Boolean
-    ) {/* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
-        var desiredState: SwerveModuleState = desiredState
-        desiredState = SwerveModuleState.optimize(desiredState, state.angle)
-//        desiredState = CTREModuleState.optimize(desiredState, state.angle)
-        setAngle(desiredState)
-        setSpeed(desiredState, isOpenLoop)
-    }
+    val driveVelocity get() = driveMotor.velocity.value * 2.0*Math.PI * Constants.Swerve.driveReduction
+    val drivePosition get() = driveMotor.position.value * 2.0*Math.PI * Constants.Swerve.driveReduction
+    val turnPosition get() = turnMotor.encoder.position * 2.0*Math.PI
+    val turnVelocity get() = turnMotor.encoder.velocity * 2.0*Math.PI
+    val coderPosition get() = turnCanCoder.position.value * 2.0*Math.PI
+    val coderVelocity get() = turnCanCoder.velocity.value * 2.0*Math.PI
 
-    private fun setSpeed(desiredState: SwerveModuleState, isOpenLoop: Boolean) {
-        if (isOpenLoop) {
-            val percentOutput: Double = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed
-            mDriveMotor.set(percentOutput)
-        } else {
-//            val velocity: Double = Conversions.MPSToFalcon(
-//                desiredState.speedMetersPerSecond,
-//                Constants.Swerve.wheelCircumference,
-//                Constants.Swerve.driveGearRatio
-//            )
-//            mDriveMotor.set(percentOutput)
-//            mDriveMotor.setControl(VelocityVoltage(velocity)
-//                .withFeedForward(feedforward.calculate(desiredState.speedMetersPerSecond))
-//                .withEnableFOC(false))
+    val state get() = SwerveModuleState(
+        driveVelocity, Rotation2d(turnPosition)
+    )
+    val position get() = SwerveModulePosition(
+        drivePosition, Rotation2d(turnPosition)
+    )
+
+    private var turnStationaryTicks: Int = 0
+
+    private fun resetRelative() {
+        System.out.printf("Resetting %s swerve encoder from absolute\n", name)
+        // Use the CANCoder's .getAbsolutePosition() API instead of
+        // .getPosition().  Even though we tell the CANCoder to boot up
+        // in absolute mode (see Util.kt), there were apparently some
+        // firmware bugs that would rarely cause .getPosition() to report
+        // incorrect values after startup.
+        // https://store.ctr-electronics.com/blog/cancoder-firmware-update-22012/
+        // https://discord.com/channels/887922855084425266/890436659450118254/1170883077195714590
+        // https://github.com/SwerveDriveSpecialties/Do-not-use-swerve-lib-2022-unmaintained/blob/55f3f1ad9e6bd81e56779d022a40917aacf8d3b3/src/main/java/com/swervedrivespecialties/swervelib/rev/NeoSteerControllerFactoryBuilder.java#L128C3-L128C3
+        turnMotor.encoder.position = turnCanCoder.absolutePosition.value
+        turnStationaryTicks = 0
+    }
+    
+    fun maybeResetRelative() {
+        // Count how many ticks this turn motor has been stationary;
+        // if we've waited long enough, we take this as a cue to reset
+        // relative encoders back to absolute.
+        if (turnVelocity < 0.3) {
+            turnStationaryTicks += 1
+        }
+        if (turnStationaryTicks > 250) {
+            resetRelative()
         }
     }
 
-    private fun angleWrap(rot: Rotation2d): Rotation2d {
-        var rad = rot.radians % (2.0*Math.PI)
-        if (rad < 0.0) {
-            rad += 2.0*Math.PI
-        }
-        return Rotation2d.fromRadians(rad)
+    private fun clamp(n: Double, r: Double) = Math.min(r, Math.max(-r, n))
+    private fun clampVoltage(n: Double) = clamp(n, Constants.Swerve.maxVoltage)
+
+    private fun wrapAngle(n: Double): Double {
+        var n2 = n % (2.0*Math.PI)
+        if (n2 < 0.0)
+            return n2 + 2.0*Math.PI
+        else
+            return n2
     }
 
-    private fun setAngle(desiredState: SwerveModuleState) {
-        var angle = if (Math.abs(desiredState.speedMetersPerSecond) <= Constants.Swerve.maxSpeed * 0.01) lastAngle
-        else desiredState.angle
-        angle = angleWrap(angle)
-        println(angle)
-        mAngleMotor.controller.setReference(angle.radians, CANSparkMax.ControlType.kPosition)
-        lastAngle = angle
+    fun drive(unoptimizedState: SwerveModuleState) {
+        // Optimize the swerve module state (i.e., drive velocity
+        // and turn position) so that we never turn more than 90 degrees.
+        val rotation = Rotation2d(turnPosition)
+        val state = SwerveModuleState.optimize(unoptimizedState, rotation)
+
+        // Scale by cosine.  If the module is far from its
+        // desired angle, then we drive it correspondingly less.
+        state.speedMetersPerSecond *= (state.angle - rotation).getCos()
+
+        val driveAmount = drivePID.calculate(driveVelocity, state.speedMetersPerSecond)
+            + driveFeedforward.calculate(state.speedMetersPerSecond)
+        val turnAmount = turnPID.calculate(wrapAngle(turnPosition), state.angle.radians)
+            + turnFeedforward.calculate(turnPID.setpoint.velocity)
+        driveMotor.setVoltage(clampVoltage(driveAmount))
+        turnMotor.setVoltage(clampVoltage(turnAmount))
     }
-
-    private val angle: Rotation2d
-        private get() = Rotation2d.fromRadians(
-            mAngleMotor.position
-        )
-    val canCoder: Rotation2d
-        get() = Rotation2d.fromDegrees(angleEncoder.absolutePosition.valueAsDouble * 360.0)
-
-    fun resetToAbsolute() {
-
-        mAngleMotor.position = canCoder.radians
-    }
-
-    private fun configAngleEncoder() {
-        angleEncoder.configurator.apply(
-            MagnetSensorConfigs().withMagnetOffset(
-                -angleOffset.degrees / 360.0 // TODO: Figure out wtf this needs as input
-            ).withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
-                .withSensorDirection(
-                    if (Constants.Swerve.canCoderInvert) SensorDirectionValue.Clockwise_Positive
-                    else SensorDirectionValue.CounterClockwise_Positive
-                )
-        )
-    }
-
-    private fun configAngleMotor() {
-        mAngleMotor.inverted = Constants.Swerve.angleMotorInvert
-        mAngleMotor.neutralMode = Constants.Swerve.angleNeutralMode
-        mAngleMotor.controller.p = Constants.Swerve.angleKP
-        mAngleMotor.controller.i = Constants.Swerve.angleKI
-        mAngleMotor.controller.d = Constants.Swerve.angleKD
-        mAngleMotor.controller.ff = Constants.Swerve.angleKF
-        mAngleMotor.motor.encoder.positionConversionFactor =
-            (1.0 / Constants.Swerve.chosenModule.angleGearRatio) * 2.0 * PI
-        mAngleMotor.motor.encoder.velocityConversionFactor =
-            (1.0 / Constants.Swerve.chosenModule.angleGearRatio) * Math.PI / 30.0 // radians
-        mAngleMotor.motor.burnFlash()
-        resetToAbsolute()
-    }
-
-    private fun configDriveMotor() {
-        mDriveMotor.configurator.apply(TalonFXConfiguration())
-        mDriveMotor.configurator.apply(Robot.ctreConfigs!!.swerveDriveFXConfig)
-        val config = TalonFXConfiguration()
-        config.MotorOutput.Inverted = if (driveMotorInvert) InvertedValue.Clockwise_Positive
-        else InvertedValue.CounterClockwise_Positive
-        config.MotorOutput.NeutralMode = (Constants.Swerve.driveNeutralMode)
-        mDriveMotor.configurator.apply(config)
-        mDriveMotor.setPosition(0.0)
-    }
-
-    val state: SwerveModuleState
-        get() = SwerveModuleState(
-            Conversions.falconToMPS(
-                mDriveMotor.velocity.value, Constants.Swerve.wheelCircumference, Constants.Swerve.driveGearRatio
-            ), angle
-        )
-    val position: SwerveModulePosition
-        get() {
-            return SwerveModulePosition(
-                Conversions.falconToMeters(
-                    mDriveMotor.position.value, Constants.Swerve.wheelCircumference, Constants.Swerve.driveGearRatio
-                ), angle
-            )
-        }
 }
-
-

@@ -1,111 +1,104 @@
 package org.chillout1778.subsystems
 
-import com.ctre.phoenix6.hardware.Pigeon2
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.kinematics.*
-import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import edu.wpi.first.math.kinematics.ChassisSpeeds
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry
+import edu.wpi.first.math.kinematics.SwerveModuleState
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.wpilibj2.command.SubsystemBase
+import org.chillout1778.commands.DriveCommand
 import org.chillout1778.Constants
 import org.chillout1778.subsystems.SwerveModule
+import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.hardware.Pigeon2
 
+// Swerve math resources:
+// https://dominik.win/blog/programming-swerve-drive/
+// https://www.chiefdelphi.com/uploads/default/original/3X/e/f/ef10db45f7d65f6d4da874cd26db294c7ad469bb.pdf
 
-object Swerve : SubsystemBase() {
-    var swerveOdometry: SwerveDriveOdometry
-    var mSwerveMods: Array<SwerveModule>
-    var gyro: Pigeon2
+object Swerve: SubsystemBase() {
+    val gyro = Pigeon2(21)
 
     init {
-        gyro = Pigeon2(Constants.Swerve.pigeonID)
-        zeroGyro()
-        mSwerveMods = arrayOf<SwerveModule>(
-            SwerveModule(0, Constants.Swerve.Mod0.constants, true),
-            SwerveModule(1, Constants.Swerve.Mod1.constants, false),
-            SwerveModule(2, Constants.Swerve.Mod2.constants, true),
-            SwerveModule(3, Constants.Swerve.Mod3.constants, false)
-        )
-
-        /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
-         * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
-         */
-        Timer.delay(1.0)
-        resetModulesToAbsolute()
-        swerveOdometry = SwerveDriveOdometry(Constants.Swerve.swerveKinematics, yaw, modulePositions)
+        //setDefaultCommand(DriveCommand())
+        gyro.reset()
     }
 
-    fun drive(translation: Translation2d, rotation: Double, fieldRelative: Boolean, isOpenLoop: Boolean) {
-        val swerveModuleStates: Array<SwerveModuleState> = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-            if (fieldRelative) ChassisSpeeds.fromFieldRelativeSpeeds(
-                translation.x,
-                translation.y,
-                rotation,
-                yaw
-            ) else ChassisSpeeds(
-                translation.x,
-                translation.y,
-                rotation
+    private fun moduleTranslation(x: Double, y: Double) = 
+        Translation2d(x,y) * Constants.Swerve.moduleXY
+
+    val modules = arrayOf(
+        SwerveModule(
+            name = "front left",
+            encoderOffset = Math.toRadians(66.23), // *****
+            driveMotorId = 6,
+            turnMotorId = 5,
+            turnCanCoderId = 10,
+            driveInversion = InvertedValue.CounterClockwise_Positive,
+            translation = moduleTranslation(1.0, 1.0)
+        ),
+        SwerveModule(
+            name = "front right",
+            encoderOffset = Math.toRadians(252.4), // *****
+            driveMotorId = 8,
+            turnMotorId = 7,
+            turnCanCoderId = 11,
+            driveInversion = InvertedValue.Clockwise_Positive,
+            translation = moduleTranslation(1.0, -1.0)
+        ),
+        SwerveModule(
+            name = "back right",
+            encoderOffset = Math.toRadians(109.1), // *****
+            driveMotorId = 2,
+            turnMotorId = 1,
+            turnCanCoderId = 12,
+            driveInversion = InvertedValue.Clockwise_Positive,
+            translation = moduleTranslation(-1.0, -1.0)
+        ),
+        SwerveModule(
+            name = "back left",
+            encoderOffset = Math.toRadians(250.2), // *****
+            driveMotorId = 4,
+            turnMotorId = 3,
+            turnCanCoderId = 13,
+            driveInversion = InvertedValue.CounterClockwise_Positive,
+            translation = moduleTranslation(-1.0, 1.0)
+        ),
+    )
+
+    val kinematics = SwerveDriveKinematics(
+        *modules.map{it.translation}.toTypedArray()
+    )
+
+    // TODO: double check
+    val odometry = SwerveDriveOdometry(
+        kinematics,
+        gyro.rotation2d,
+        modules.map{it.position}.toTypedArray()
+    )
+
+    fun drive(x: Double, y: Double, rot: Double) {
+        // TODO: use ChassisSpeeds.discretize() once we have
+        // WPILib 2024; this accounts for setting motor outputs
+        // every 20ms instead of continuously.
+        val states: Array<SwerveModuleState> = kinematics.toSwerveModuleStates(
+            ChassisSpeeds.fromFieldRelativeSpeeds(
+                x, y, rot, gyro.rotation2d
             )
         )
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed)
-        for (mod in mSwerveMods) {
-            mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop)
-        }
-    }
 
-    val pose: Pose2d
-        get() = swerveOdometry.poseMeters
+        // Reduce module speeds so that none are faster than the
+        // maximum.  The ratio between speeds is kept the same.
+        SwerveDriveKinematics.desaturateWheelSpeeds(states,
+            Constants.Swerve.maxSpeed)
 
-    fun resetOdometry(pose: Pose2d?) {
-        swerveOdometry.resetPosition(yaw, modulePositions, pose)
-    }
+        for (i in states.indices)
+            modules[i].drive(states[i])
 
-    var moduleStates: Array<SwerveModuleState?>
-        get() {
-            val states = arrayOfNulls<SwerveModuleState>(4)
-            for (mod in mSwerveMods) {
-                states[mod.moduleNumber] = mod.state
-            }
-            return states
-        }
-        /* Used by SwerveControllerCommand in Auto */ set(desiredStates) {
-            SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed)
-            for (mod in mSwerveMods) {
-                mod.setDesiredState(desiredStates[mod.moduleNumber]!!, false)
-            }
-        }
-    val modulePositions: Array<SwerveModulePosition?>
-        get() {
-            val positions = arrayOfNulls<SwerveModulePosition>(4)
-            for (mod in mSwerveMods) {
-                positions[mod.moduleNumber] = mod.position
-            }
-            return positions
-        }
-
-    fun zeroGyro() {
-        gyro.setYaw(0.0)
-    }
-
-    val yaw: Rotation2d
-        get() = if (Constants.Swerve.invertGyro) Rotation2d.fromDegrees(360 - gyro.yaw.value) else Rotation2d.fromDegrees(
-            gyro.yaw.value
+        odometry.update(
+            gyro.rotation2d,
+            modules.map{it.position}.toTypedArray()
         )
-
-    fun resetModulesToAbsolute() {
-        for (mod in mSwerveMods) {
-            mod.resetToAbsolute()
-        }
     }
-
-    override fun periodic() {
-        swerveOdometry.update(yaw, modulePositions)
-        for (mod in mSwerveMods) {
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.canCoder.degrees)
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.position.angle.degrees)
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.state.speedMetersPerSecond)
-        }
-    }
-
 }
