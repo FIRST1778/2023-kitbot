@@ -21,7 +21,7 @@ object Swerve: SubsystemBase() {
     val gyro = Pigeon2(21)
 
     init {
-        //setDefaultCommand(DriveCommand())
+        defaultCommand = DriveCommand()
         gyro.reset()
     }
 
@@ -32,8 +32,8 @@ object Swerve: SubsystemBase() {
         SwerveModule(
             name = "front left",
             encoderOffset = Math.toRadians(66.23), // *****
-            driveMotorId = 6,
-            turnMotorId = 5,
+            driveMotorId = 1,
+            turnMotorId = 2,
             turnCanCoderId = 10,
             driveInversion = InvertedValue.CounterClockwise_Positive,
             translation = moduleTranslation(1.0, 1.0)
@@ -41,8 +41,8 @@ object Swerve: SubsystemBase() {
         SwerveModule(
             name = "front right",
             encoderOffset = Math.toRadians(252.4), // *****
-            driveMotorId = 8,
-            turnMotorId = 7,
+            driveMotorId = 3,
+            turnMotorId = 4,
             turnCanCoderId = 11,
             driveInversion = InvertedValue.Clockwise_Positive,
             translation = moduleTranslation(1.0, -1.0)
@@ -50,17 +50,17 @@ object Swerve: SubsystemBase() {
         SwerveModule(
             name = "back right",
             encoderOffset = Math.toRadians(109.1), // *****
-            driveMotorId = 2,
-            turnMotorId = 1,
-            turnCanCoderId = 12,
+            driveMotorId = 7,
+            turnMotorId = 8,
+            turnCanCoderId = 14,
             driveInversion = InvertedValue.Clockwise_Positive,
             translation = moduleTranslation(-1.0, -1.0)
         ),
         SwerveModule(
             name = "back left",
             encoderOffset = Math.toRadians(250.2), // *****
-            driveMotorId = 4,
-            turnMotorId = 3,
+            driveMotorId = 5,
+            turnMotorId = 6,
             turnCanCoderId = 13,
             driveInversion = InvertedValue.CounterClockwise_Positive,
             translation = moduleTranslation(-1.0, 1.0)
@@ -79,6 +79,9 @@ object Swerve: SubsystemBase() {
     )
 
     fun drive(x: Double, y: Double, rot: Double) {
+        println("rot, ${Controls.rot()}")
+        println("x, ${Controls.x()}")
+        println("y, ${Controls.y()}")
         // TODO: use ChassisSpeeds.discretize() once we have
         // WPILib 2024; this accounts for setting motor outputs
         // every 20ms instead of continuously.

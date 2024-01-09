@@ -8,8 +8,7 @@ import org.chillout1778.subsystems.Swerve
 
 object Robot : TimedRobot() {
     fun start() {
-        // Is this necessary?
-        //RobotBase.startRobot{this}
+        RobotBase.startRobot{this}
         // Probably a good idea to initialize singleton objects
         Swerve
         System.out.println("===== 1778's new swerve code is running")
@@ -17,6 +16,9 @@ object Robot : TimedRobot() {
 
     var pdh = PowerDistribution(1, PowerDistribution.ModuleType.kRev)
 
+    override fun robotInit() {
+
+    }
     override fun robotPeriodic() {
         CommandScheduler.getInstance().run()
         for (mod in Swerve.modules)

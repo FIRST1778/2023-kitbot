@@ -48,10 +48,10 @@ object Constants {
         // TODO: ************************ CRITICAL TO TUNE vvvvv
         // If the PID values are too slow, they will limit our max speed.
         // These map error to voltage.
-        fun driveController() = PIDController(5.0, 0.0, 0.05)
-        fun turnController()  = ProfiledPIDController(1.0, 0.0, 0.01,
+        fun driveController() = PIDController(0.05, 0.0, 0.0)
+        fun turnController()  = ProfiledPIDController(0.3, 0.0, 0.0,
             TrapezoidProfile.Constraints(
-                maxAngularSpeed, maxAngularAcceleration
+                1.0, 1.0
                 // TODO: correct now that we control velocity?
             )
         )
