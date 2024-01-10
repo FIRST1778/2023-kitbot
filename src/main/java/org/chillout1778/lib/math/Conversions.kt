@@ -10,6 +10,10 @@ object Conversions {
         return positionCounts * (360.0 / (gearRatio * 4096.0))
     }
 
+    fun MPSToRPS(wheelMPS: Double, circumference: Double): Double {
+        return wheelMPS / circumference
+    }
+
     /**
      * @param degrees Degrees of rotation of Mechanism
      * @param gearRatio Gear Ratio between CANCoder and Mechanism

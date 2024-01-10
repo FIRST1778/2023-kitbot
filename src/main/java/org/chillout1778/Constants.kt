@@ -1,19 +1,32 @@
 package org.chillout1778
 
-import com.ctre.phoenix6.configs.MotorOutputConfigs
 import com.ctre.phoenix6.signals.NeutralModeValue
 import com.revrobotics.CANSparkMax.IdleMode
-
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics
+import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.math.util.Units
 import org.chillout1778.lib.util.COTSFalconSwerveConstants
 import org.chillout1778.lib.util.SwerveModuleConstants
 
 
 object Constants {
+    object Auto{
+        const val kMaxSpeedMetersPerSecond = 3.0
+        const val kMaxAccelerationMetersPerSecondSquared = 3.0
+        const val kMaxAngularSpeedRadiansPerSecond = Math.PI
+        const val kMaxAngularSpeedRadiansPerSecondSquared = Math.PI
 
+        const val kPXController = 1.0
+        const val kPYController = 1.0
+        const val kPThetaController = 1.0
+
+        /* Constraint for the motion profilied robot angle controller */
+        val kThetaControllerConstraints = TrapezoidProfile.Constraints(
+            kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared
+        )
+    }
     object Pigeon {
         const val canId = 21
     }
@@ -81,10 +94,10 @@ object Constants {
         const val closedLoopRamp = 0.0
 
         /* Angle Motor PID Values */
-        val angleKP = chosenModule.angleKP
-        val angleKI = chosenModule.angleKI
-        val angleKD = chosenModule.angleKD
-        val angleKF = chosenModule.angleKF
+        val angleKP = 0.5
+        val angleKI = 0.0
+        val angleKD = 0.0
+        val angleKF = 0.0
 
         /* Drive Motor PID Values */
         const val driveKP = 0.05 //TODO: This must be tuned to specific robot

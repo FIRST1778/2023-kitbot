@@ -3,6 +3,8 @@ package org.chillout1778.subsystems
 
 import com.ctre.phoenix6.configs.MagnetSensorConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.controls.DutyCycleOut
+import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
@@ -27,9 +29,12 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     private val mAngleMotor: NEO
     private val mDriveMotor: TalonFX
     private val angleEncoder: CANcoder
-    private var feedforward: SimpleMotorFeedforward =
+    private var driveFeedForward: SimpleMotorFeedforward =
         SimpleMotorFeedforward(Constants.Swerve.driveKS, Constants.Swerve.driveKV, Constants.Swerve.driveKA)
 
+    /* drive motor control requests */
+    private val driveDutyCycle = DutyCycleOut(0.0)
+    private val driveVelocity = VelocityVoltage(0.0)
     init {
         angleOffset = moduleConstants.angleOffset
 
@@ -45,10 +50,10 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     }
 
     fun setDesiredState(
-        desiredState: SwerveModuleState,
+        state: SwerveModuleState,
         isOpenLoop: Boolean
     ) {/* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
-        var desiredState: SwerveModuleState = desiredState
+        var desiredState: SwerveModuleState = state
         desiredState = SwerveModuleState.optimize(desiredState, state.angle)
 //        desiredState = CTREModuleState.optimize(desiredState, state.angle)
         setAngle(desiredState)
@@ -56,19 +61,13 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     }
 
     private fun setSpeed(desiredState: SwerveModuleState, isOpenLoop: Boolean) {
-        if (isOpenLoop) {
-            val percentOutput: Double = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed
-            mDriveMotor.set(percentOutput)
+        if(isOpenLoop){
+            driveDutyCycle.Output = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed
+            mDriveMotor.setControl(driveDutyCycle)
         } else {
-//            val velocity: Double = Conversions.MPSToFalcon(
-//                desiredState.speedMetersPerSecond,
-//                Constants.Swerve.wheelCircumference,
-//                Constants.Swerve.driveGearRatio
-//            )
-//            mDriveMotor.set(percentOutput)
-//            mDriveMotor.setControl(VelocityVoltage(velocity)
-//                .withFeedForward(feedforward.calculate(desiredState.speedMetersPerSecond))
-//                .withEnableFOC(false))
+            driveVelocity.Velocity = Conversions.MPSToRPS(desiredState.speedMetersPerSecond, Constants.Swerve.wheelCircumference)
+            driveVelocity.FeedForward = driveFeedForward.calculate(desiredState.speedMetersPerSecond)
+            mDriveMotor.setControl(driveVelocity)
         }
     }
 
@@ -114,6 +113,9 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     }
 
     private fun configAngleMotor() {
+        mAngleMotor.controller.setPositionPIDWrappingEnabled(true);
+        mAngleMotor.controller.setPositionPIDWrappingMinInput(0.0);
+        mAngleMotor.controller.setPositionPIDWrappingMaxInput(2 * Math.PI);
         mAngleMotor.inverted = Constants.Swerve.angleMotorInvert
         mAngleMotor.neutralMode = Constants.Swerve.angleNeutralMode
         mAngleMotor.controller.p = Constants.Swerve.angleKP
