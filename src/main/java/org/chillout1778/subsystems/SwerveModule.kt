@@ -50,14 +50,13 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
     }
 
     fun setDesiredState(
-        state: SwerveModuleState,
+        unoptimizedState: SwerveModuleState,
         isOpenLoop: Boolean
-    ) {/* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
-        var desiredState: SwerveModuleState = state
-        desiredState = SwerveModuleState.optimize(desiredState, state.angle)
+    ) {
+        val optimizedState = SwerveModuleState.optimize(unoptimizedState, angle)
 //        desiredState = CTREModuleState.optimize(desiredState, state.angle)
-        setAngle(desiredState)
-        setSpeed(desiredState, isOpenLoop)
+        setAngle(optimizedState)
+        setSpeed(optimizedState, isOpenLoop)
     }
 
     private fun setSpeed(desiredState: SwerveModuleState, isOpenLoop: Boolean) {

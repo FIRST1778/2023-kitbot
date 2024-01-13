@@ -28,7 +28,7 @@ class RobotContainer {
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
         Swerve.defaultCommand = TeleopSwerve(
-            { -driver.getRawAxis(translationAxis) },
+            { driver.getRawAxis(translationAxis) },
             { -driver.getRawAxis(strafeAxis) },
             { -driver.getRawAxis(rotationAxis) }
         ) { robotCentric }
