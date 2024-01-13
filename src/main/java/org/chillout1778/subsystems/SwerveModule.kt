@@ -94,7 +94,7 @@ class SwerveModule(
     private fun clampVoltage(n: Double) = clamp(n, Constants.Swerve.maxVoltage)
 
     private fun wrapAngle(n: Double): Double {
-        var n2 = n % (2.0*Math.PI)
+        val n2 = n % (2.0*Math.PI)
         if (n2 < 0.0)
             return n2 + 2.0*Math.PI
         else

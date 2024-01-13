@@ -24,11 +24,6 @@ class DriveCommand: Command() {
     private fun square(n: Double) = n*n*Math.signum(n)
 
     override fun execute() {
-        // TODO: some kind of drive inversion?  This is unnecessary if
-        // the field is rotationally symmetrical (most years, not 2023).
-        println("rot, ${Controls.rot()}")
-        println("x, ${Controls.x()}")
-        println("y, ${Controls.y()}")
         Swerve.drive(
             square(deadband(Controls.x())) * Constants.Swerve.maxSpeed,
             -square(deadband(Controls.y())) * Constants.Swerve.maxSpeed,
