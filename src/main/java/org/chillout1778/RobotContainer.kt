@@ -13,6 +13,7 @@ import org.chillout1778.subsystems.Swerve
 class RobotContainer {
     /* Controllers */
     private val driver = Joystick(0)
+    val op = XboxController(1)
 
     /* Drive Controls */
     private val translationAxis = 2
@@ -26,11 +27,11 @@ class RobotContainer {
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {
-        Swerve.defaultCommand = TeleopSwerve(
+        /* Swerve.defaultCommand = TeleopSwerve(
             { -driver.getRawAxis(translationAxis) },
             { -driver.getRawAxis(strafeAxis) },
             { -driver.getRawAxis(rotationAxis) }
-        ) { robotCentric }
+        ) { robotCentric }*/ 
 
         // Configure the button bindings
         configureButtonBindings()
