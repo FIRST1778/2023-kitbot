@@ -11,15 +11,6 @@ class DriveCommand: Command() {
         addRequirements(Swerve)
     }
 
-//    private fun capDriveSpeed(speed: Double) =
-//        if (speed > 1.0) {
-//            1.0
-//        } else if (speed < -1.0) {
-//            -1.0
-//        } else {
-//            speed
-//        }
-
     private fun deadband(n: Double) = if (Math.abs(n) < 0.1) 0.0 else n
     private fun square(n: Double) = n*n*Math.signum(n)
 
@@ -30,8 +21,4 @@ class DriveCommand: Command() {
             -square(deadband(Controls.rot())) * Constants.Swerve.maxAngularSpeed
         )
     }
-
-//    override fun isFinished(): Boolean {
-//        return false
-//    }
 }

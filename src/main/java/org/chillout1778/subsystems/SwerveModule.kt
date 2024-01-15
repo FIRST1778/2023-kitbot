@@ -48,8 +48,8 @@ class SwerveModule(
         resetRelative()
     }
 
-    val driveVelocity get() = driveMotor.velocity.value * 2.0*Math.PI * Constants.Swerve.driveReduction
-    val drivePosition get() = driveMotor.position.value * 2.0*Math.PI * Constants.Swerve.driveReduction
+    val driveVelocity get() = driveMotor.velocity.value * 2.0*Math.PI * Constants.Swerve.driveReduction * Constants.Swerve.colsonWheelRadius
+    val drivePosition get() = driveMotor.position.value * 2.0*Math.PI * Constants.Swerve.driveReduction * Constants.Swerve.colsonWheelRadius
     val turnPosition get() = turnMotor.encoder.position * 2.0*Math.PI
     val turnVelocity get() = turnMotor.encoder.velocity * 2.0*Math.PI
     val coderPosition get() = turnCanCoder.position.value * 2.0*Math.PI
@@ -65,7 +65,7 @@ class SwerveModule(
     private var turnStationaryTicks: Int = 0
 
     private fun resetRelative() {
-        System.out.printf("Resetting %s swerve encoder from absolute\n", name)
+        //System.out.printf("Resetting %s swerve encoder from absolute\n", name)
         // Use the CANCoder's .getAbsolutePosition() API instead of
         // .getPosition().  Even though we tell the CANCoder to boot up
         // in absolute mode (see Util.kt), there were apparently some
@@ -112,10 +112,14 @@ class SwerveModule(
         state.speedMetersPerSecond *= (state.angle - rotation).getCos()
 
         val driveAmount = drivePID.calculate(driveVelocity, state.speedMetersPerSecond)
-            + driveFeedforward.calculate(state.speedMetersPerSecond)
-        val turnAmount = turnPID.calculate(wrapAngle(turnPosition), state.angle.radians)
-            + turnFeedforward.calculate(turnPID.setpoint.velocity)
-        driveMotor.setVoltage(clampVoltage(driveAmount))
-        turnMotor.setVoltage(clampVoltage(turnAmount))
+        if (name == "front left") {
+            //println("$name cur $driveVelocity want ${state.speedMetersPerSecond} volts $driveAmount")
+            println("$name raw ${driveMotor.velocity.value} cur $driveVelocity want ${state.speedMetersPerSecond} volts $driveAmount")
+        }
+            //+ driveFeedforward.calculate(state.speedMetersPerSecond)
+        //val turnAmount = turnPID.calculate(wrapAngle(turnPosition), state.angle.radians)
+            //+ turnFeedforward.calculate(turnPID.setpoint.velocity)
+        driveMotor.setVoltage(1.0)//clampVoltage(driveAmount))
+        //turnMotor.setVoltage(clampVoltage(turnAmount))
     }
 }

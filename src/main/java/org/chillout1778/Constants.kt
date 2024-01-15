@@ -28,30 +28,24 @@ object Constants {
         val moduleXY = Units.inchesToMeters(11.75)
         val moduleRadius = moduleXY * sqrt(2.0)
 
-        // The gear ratio for an MK4i L2 swerve module, about 1 : 6.75.
-        // We multiply by "(driving gear teeth) / (driven gear teeth)"
-        // for each stage of the gearbox.
-        // https://www.swervedrivespecialties.com/products/mk4i-swerve-module
-        const val driveReduction = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)
+        const val driveReduction = 1.0 / 6.12
         val colsonWheelRadius = Units.inchesToMeters(2.0)
         val neoFreeSpeed = 5676.0 * Math.PI / 30.0
         val theoreticalMaxSpeed = neoFreeSpeed * driveReduction * colsonWheelRadius
+        // WE DONT USE NEOS
         val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius
         // The above math is also contained in swerve.py in the root
         // of the repository.
 
-        val maxSpeed = theoreticalMaxSpeed / 2.0 // **** safe testing value
-        val maxAngularSpeed = theoreticalMaxAngularSpeed / 2.0 // ****
-        val maxAngularAcceleration = Math.PI / 2.0
+        val maxSpeed = 1.0 //theoreticalMaxSpeed / 2.0 // **** safe testing value
+        val maxAngularSpeed = 1.0 // theoreticalMaxAngularSpeed / 2.0 // ****
+        val maxAngularAcceleration = 1.0 // Math.PI / 2.0
         val maxVoltage: Double = 12.0
 
-        // TODO: ************************ CRITICAL TO TUNE vvvvv
-        // If the PID values are too slow, they will limit our max speed.
-        // These map error to voltage.
-        fun driveController() = PIDController(0.05, 0.0, 0.0)
-        fun turnController()  = ProfiledPIDController(0.3, 0.0, 0.0,
+        fun driveController() = PIDController(3.0, 0.0, 0.0)
+        fun turnController()  = ProfiledPIDController(0.0, 0.0, 0.0,
             TrapezoidProfile.Constraints(
-                1.0, 1.0
+                3.0, 3.0
                 // TODO: correct now that we control velocity?
             )
         )

@@ -17,7 +17,7 @@
         },
         {
             "name": "Deploy",
-            "shell_cmd": "gradle deploy",
+            "shell_cmd": "gradle --offline deploy",
             "working_dir": "$project_path",
         }
     ]
