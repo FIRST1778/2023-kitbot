@@ -10,7 +10,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.chillout1778.Constants
 import org.chillout1778.subsystems.SwerveModule
-
+import com.pathplanner.lib.auto.AutoBuilder
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig
+import com.pathplanner.lib.util.PIDConstants
+import com.pathplanner.lib.util.ReplanningConfig
+import edu.wpi.first.wpilibj.DriverStation
 
 object Swerve : SubsystemBase() {
     var swerveOdometry: SwerveDriveOdometry
@@ -33,10 +37,37 @@ object Swerve : SubsystemBase() {
         Timer.delay(1.0)
         resetModulesToAbsolute()
         swerveOdometry = SwerveDriveOdometry(Constants.Swerve.swerveKinematics, yaw, modulePositions)
+
+        AutoBuilder.configureHolonomic(
+            { swerveOdometry.getPoseMeters() },
+            { pose: Pose2d -> swerveOdometry.resetPosition(yaw, modulePositions, pose) },
+            { Constants.Swerve.swerveKinematics.toChassisSpeeds(*moduleStates) },
+            { speeds: ChassisSpeeds -> driveChassisSpeeds(speeds, false) },
+            HolonomicPathFollowerConfig(
+                PIDConstants(5.0,0.0,0.0),
+                PIDConstants(5.0,0.0,0.0),
+                4.5,
+                Constants.Swerve.radius,
+                ReplanningConfig()
+            ),
+            {
+                val alliance = DriverStation.getAlliance()
+                alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red
+            },
+            this
+        )
+    }
+
+    fun driveChassisSpeeds(speeds: ChassisSpeeds, isOpenLoop: Boolean) {
+        val swerveModuleStates: Array<SwerveModuleState> = Constants.Swerve.swerveKinematics.toSwerveModuleStates(speeds)
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed)
+        for (mod in mSwerveMods) {
+            mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop)
+        }
     }
 
     fun drive(translation: Translation2d, rotation: Double, fieldRelative: Boolean, isOpenLoop: Boolean) {
-        val swerveModuleStates: Array<SwerveModuleState> = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
+        driveChassisSpeeds(
             if (fieldRelative) ChassisSpeeds.fromFieldRelativeSpeeds(
                 translation.x,
                 translation.y,
@@ -46,12 +77,9 @@ object Swerve : SubsystemBase() {
                 translation.x,
                 translation.y,
                 rotation
-            )
+            ),
+            isOpenLoop
         )
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed)
-        for (mod in mSwerveMods) {
-            mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop)
-        }
     }
 
     val pose: Pose2d
