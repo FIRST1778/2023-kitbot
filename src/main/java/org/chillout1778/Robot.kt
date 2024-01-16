@@ -52,7 +52,9 @@ object Robot : TimedRobot() {
     override fun disabledPeriodic() {}
 
     override fun autonomousInit() {
-
+        val path = PathPlannerPath.fromChoreoTrajectory("NewPath")
+        m_autonomousCommand = AutoBuilder.followPathWithEvents(path)
+        m_autonomousCommand.schedule()
     }
 
     override fun autonomousPeriodic() {}
