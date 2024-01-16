@@ -54,7 +54,8 @@ object Robot : TimedRobot() {
     override fun autonomousInit() {
         val path = PathPlannerPath.fromChoreoTrajectory("NewPath")
         m_autonomousCommand = AutoBuilder.followPathWithEvents(path)
-        m_autonomousCommand.schedule()
+        println("===== Not scheduling autonomous command, check trajectories and Robot.kt")
+        //m_autonomousCommand.schedule()
     }
 
     override fun autonomousPeriodic() {}
