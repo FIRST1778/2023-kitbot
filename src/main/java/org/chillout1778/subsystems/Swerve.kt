@@ -19,14 +19,6 @@ import com.pathplanner.lib.auto.AutoBuilder
 // https://www.chiefdelphi.com/uploads/default/original/3X/e/f/ef10db45f7d65f6d4da874cd26db294c7ad469bb.pdf
 
 object Swerve: SubsystemBase() {
-    init {
-        AutoBuilder.configureHolonomic(
-            { odometry.getPoseMeters() },
-            { odometry.resetPosition() },
-            { kinematics.toChassisSpeeds(modules.map{it.state}.toTypedArray()) },
-        )
-    }
-
     val gyro = Pigeon2(21)
 
     init {
@@ -88,7 +80,7 @@ object Swerve: SubsystemBase() {
         // We'd need to calculate this with values from SmartDashboard.
     )
 
-    fun drive(x: Double, y: Double, rot: Double, fieldRelative: Boolean = true) {
+    fun drive(x: Double, y: Double, rot: Double) {
         println("rot, ${rot}")
         println("x, ${x}")
         println("y, ${y}")
@@ -96,8 +88,7 @@ object Swerve: SubsystemBase() {
         // WPILib 2024; this accounts for setting motor outputs
         // every 20ms instead of continuously.
         val states: Array<SwerveModuleState> = kinematics.toSwerveModuleStates(
-            fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(x, y, rot, gyro.rotation2d)
-                          : ChassisSpeeds(x, y, rot)
+            ChassisSpeeds.fromFieldRelativeSpeeds(x, y, rot, gyro.rotation2d)
         )
 
         // Reduce module speeds so that none are faster than the

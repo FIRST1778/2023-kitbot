@@ -30,22 +30,22 @@ object Constants {
 
         const val driveReduction = 1.0 / 6.12
         val colsonWheelRadius = Units.inchesToMeters(2.0)
-        val neoFreeSpeed = 5676.0 * Math.PI / 30.0
-        val theoreticalMaxSpeed = neoFreeSpeed * driveReduction * colsonWheelRadius
+        //val neoFreeSpeed = 5676.0 * Math.PI / 30.0
+        //val theoreticalMaxSpeed = neoFreeSpeed * driveReduction * colsonWheelRadius
         // WE DONT USE NEOS
-        val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius
+        //val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius
         // The above math is also contained in swerve.py in the root
         // of the repository.
 
         val maxSpeed = 1.0 //theoreticalMaxSpeed / 2.0 // **** safe testing value
         val maxAngularSpeed = 1.0 // theoreticalMaxAngularSpeed / 2.0 // ****
         val maxAngularAcceleration = 1.0 // Math.PI / 2.0
-        val maxVoltage: Double = 12.0
+        val maxVoltage: Double = 5.0
 
         fun driveController() = PIDController(3.0, 0.0, 0.0)
         fun turnController()  = ProfiledPIDController(0.0, 0.0, 0.0,
             TrapezoidProfile.Constraints(
-                3.0, 3.0
+                1.0, 1.0
                 // TODO: correct now that we control velocity?
             )
         )
