@@ -8,7 +8,7 @@ import com.pathplanner.lib.path.PathPlannerPath
 import com.pathplanner.lib.auto.AutoBuilder
 
 
-object Robot : TimedRobot() {
+object Robot: TimedRobot() {
     fun start(){
         RobotBase.startRobot{this}
     }
