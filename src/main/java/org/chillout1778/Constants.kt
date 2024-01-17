@@ -42,7 +42,7 @@ object Constants {
         val maxAngularAcceleration = 1.0 // Math.PI / 2.0
         val maxVoltage: Double = 5.0
 
-        fun driveController() = PIDController(3.0, 0.0, 0.0)
+        fun driveController() = PIDController(0.3, 0.0, 0.0)
         fun turnController()  = ProfiledPIDController(0.0, 0.0, 0.0,
             TrapezoidProfile.Constraints(
                 1.0, 1.0
