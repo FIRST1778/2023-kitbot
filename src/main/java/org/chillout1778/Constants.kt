@@ -31,16 +31,14 @@ object Constants {
         val driveReduction = 1.0 / 6.12
         val angleReduction = 7.0 / 150.0
         val colsonWheelRadius = Units.inchesToMeters(2.0)
+        val falconFreeSpeed = 6380.0 * Math.PI / 30.0
         //val neoFreeSpeed = 5676.0 * Math.PI / 30.0
-        //val theoreticalMaxSpeed = neoFreeSpeed * driveReduction * colsonWheelRadius
-        // WE DONT USE NEOS
-        //val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius
-        // The above math is also contained in swerve.py in the root
-        // of the repository.
+        val theoreticalMaxSpeed = falconFreeSpeed * driveReduction * colsonWheelRadius
+        val theoreticalMaxAngularSpeed = theoreticalMaxSpeed / moduleRadius
 
-        val maxSpeed = 1.0 //theoreticalMaxSpeed / 2.0 // **** safe testing value
-        val maxAngularSpeed = 1.0 // theoreticalMaxAngularSpeed / 2.0 // ****
-        val maxAngularAcceleration = 1.0 // Math.PI / 2.0
+        val maxSpeed = theoreticalMaxSpeed //theoreticalMaxSpeed / 2.0 // **** safe testing value
+        val maxAngularSpeed = theoreticalMaxAngularSpeed * 0.7 // theoreticalMaxAngularSpeed / 2.0 // ****
+        //val maxAngularAcceleration =  // Math.PI / 2.0
         val maxVoltage: Double = 12.0
 
         fun driveController() = PIDController(2.0, 0.0, 0.0)

@@ -7,20 +7,18 @@ import com.ctre.phoenix6.hardware.CANcoder
 import com.ctre.phoenix6.hardware.TalonFX
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue
+import com.ctre.phoenix6.signals.NeutralModeValue
 import com.ctre.phoenix6.signals.SensorDirectionValue
 import com.revrobotics.CANSparkMax
 import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.ProfiledPIDController
 import edu.wpi.first.math.controller.SimpleMotorFeedforward
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
 import edu.wpi.first.math.kinematics.SwerveModulePosition
 import edu.wpi.first.math.kinematics.SwerveModuleState
-import edu.wpi.first.math.trajectory.TrapezoidProfile
 import edu.wpi.first.util.sendable.Sendable
 import edu.wpi.first.util.sendable.SendableBuilder
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard
-import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.chillout1778.Constants
 import org.chillout1778.lib.Util
 
@@ -49,6 +47,7 @@ class SwerveModule(
             FeedbackConfigs().withSensorToMechanismRatio(1.0)
                              .withRotorToSensorRatio(1.0)
         )
+        driveMotor.setNeutralMode(NeutralModeValue.Brake)
         turnMotor.inverted = true
         turnMotor.idleMode = CANSparkMax.IdleMode.kCoast
         turnMotor.encoder.positionConversionFactor = 1.0
@@ -113,12 +112,10 @@ class SwerveModule(
 
         // Scale by cosine.  If the module is far from its
         // desired angle, then we drive it correspondingly less.
-        optimizedState.speedMetersPerSecond *= (optimizedState.angle - rotation).getCos()
-
-        val driveAmount = drivePID.calculate(driveVelocity, optimizedState.speedMetersPerSecond)
-            + driveFeedforward.calculate(optimizedState.speedMetersPerSecond)
-        driveMotor.setVoltage(clampVoltage(driveAmount))
-        val turnAmount = turnPID.calculate(turnPosition, Util.wrapAngle(optimizedState.angle.radians))
+        var wantDriveVelocity = optimizedState.speedMetersPerSecond * (optimizedState.angle - rotation).getCos()
+        var wantAnglePosition = Util.wrapAngle(optimizedState.angle.radians)
+        driveMotor.setVoltage(clampVoltage(wantDriveVelocity / Constants.Swerve.maxSpeed * Constants.Swerve.maxVoltage))
+        val turnAmount = turnPID.calculate(turnPosition, wantAnglePosition)
         turnMotor.setVoltage(clampVoltage(turnAmount))
     }
 
