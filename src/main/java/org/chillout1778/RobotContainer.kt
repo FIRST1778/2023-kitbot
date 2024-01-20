@@ -8,12 +8,12 @@ import edu.wpi.first.wpilibj2.command.InstantCommand
 import edu.wpi.first.wpilibj2.command.button.JoystickButton
 import org.chillout1778.commands.TeleopSwerve
 import org.chillout1778.subsystems.Swerve
+import edu.wpi.first.math.MathUtil
 
-
-class RobotContainer {
+object RobotContainer {
     /* Controllers */
     private val driver = Joystick(0)
-    val op = XboxController(1)
+    private val op = XboxController(1)
 
     /* Drive Controls */
     private val translationAxis = 2
@@ -24,6 +24,8 @@ class RobotContainer {
     private val zeroGyro = JoystickButton(driver, XboxController.Button.kY.value)
     private val robotCentric = false
 
+    private val shooterAxis = 3
+    fun getShooterAxis() =  MathUtil.applyDeadband(op.getRawAxis(3), 0.1)
 
     /** The container for the robot. Contains subsystems, OI devices, and commands.  */
     init {

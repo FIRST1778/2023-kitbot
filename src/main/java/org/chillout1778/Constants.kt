@@ -55,6 +55,8 @@ object Constants {
 
         val wheelBase = Units.inchesToMeters(23.5)
 
+        val radius = Math.hypot(trackWidth/2, wheelBase/2)
+
         val wheelCircumference = chosenModule.wheelCircumference
 
         /* Swerve Kinematics

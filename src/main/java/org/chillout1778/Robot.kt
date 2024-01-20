@@ -4,13 +4,11 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
 import edu.wpi.first.wpilibj2.command.Command
 import edu.wpi.first.wpilibj2.command.CommandScheduler
+import com.pathplanner.lib.path.PathPlannerPath
+import com.pathplanner.lib.auto.AutoBuilder
 
-import com.revrobotics.CANSparkMax
-import com.revrobotics.CANSparkMaxLowLevel
-import edu.wpi.first.wpilibj.XboxController
-import edu.wpi.first.math.MathUtil
 
-object Robot : TimedRobot() {
+object Robot: TimedRobot() {
     fun start(){
         RobotBase.startRobot{this}
     }
@@ -18,17 +16,12 @@ object Robot : TimedRobot() {
 
     private var m_autonomousCommand: Command? = null
 
-    private var m_robotContainer: RobotContainer? = null
-
     /**
      * This function is run when the robot is first started up and should be used for any
      * initialization code.
      */
     override fun robotInit() {
         ctreConfigs = CTREConfigs
-        // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
-        // autonomous chooser on the dashboard.
-        m_robotContainer = RobotContainer()
     }
 
     /**
@@ -52,7 +45,10 @@ object Robot : TimedRobot() {
     override fun disabledPeriodic() {}
 
     override fun autonomousInit() {
-
+        val path = PathPlannerPath.fromChoreoTrajectory("NewPath")
+        m_autonomousCommand = AutoBuilder.followPathWithEvents(path)
+        println("===== Not scheduling autonomous command, check trajectories and Robot.kt")
+        //m_autonomousCommand.schedule()
     }
 
     override fun autonomousPeriodic() {}
