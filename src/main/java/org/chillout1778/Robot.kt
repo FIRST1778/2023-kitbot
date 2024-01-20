@@ -69,11 +69,12 @@ object Robot : TimedRobot() {
 
     val leftMotor = CANSparkMax(15, CANSparkMaxLowLevel.MotorType.kBrushless)
     val rightMotor = CANSparkMax(16, CANSparkMaxLowLevel.MotorType.kBrushless)
+    val percentSpeed : Double = 100.0
 
     override fun teleopPeriodic() {
         val v = MathUtil.applyDeadband(m_robotContainer!!.op.getRawAxis(3), 0.1)
-        leftMotor.set(v)
-        rightMotor.set(v)
+        leftMotor.set(v * (percentSpeed / 100.0))
+        rightMotor.set(v * (percentSpeed / 100.0))
     }
 
     override fun testInit() {

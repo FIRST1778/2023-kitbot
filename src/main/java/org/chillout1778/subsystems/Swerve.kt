@@ -1,6 +1,7 @@
 package org.chillout1778.subsystems
 
 import com.ctre.phoenix6.hardware.Pigeon2
+import com.pathplanner.lib.auto.AutoBuilder
 import edu.wpi.first.math.geometry.Pose2d
 import edu.wpi.first.math.geometry.Rotation2d
 import edu.wpi.first.math.geometry.Translation2d
@@ -9,11 +10,13 @@ import edu.wpi.first.wpilibj.Timer
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import edu.wpi.first.wpilibj2.command.SubsystemBase
 import org.chillout1778.Constants
-import org.chillout1778.subsystems.SwerveModule
+import org.chillout1778.lib.SwerveModule
+import java.util.function.Supplier
 
 
 object Swerve : SubsystemBase() {
     var swerveOdometry: SwerveDriveOdometry
+//    var swerveKinematics : SwerveDriveKinematics
     var mSwerveMods: Array<SwerveModule>
     var gyro: Pigeon2
 
@@ -33,6 +36,17 @@ object Swerve : SubsystemBase() {
         Timer.delay(1.0)
         resetModulesToAbsolute()
         swerveOdometry = SwerveDriveOdometry(Constants.Swerve.swerveKinematics, yaw, modulePositions)
+
+        //AUTO, last part of init
+//        AutoBuilder.configureHolonomic(
+//            { pose },
+//            { resetOdometry(pose) },
+//            {  }
+//
+//
+//
+//
+//        )
     }
 
     fun drive(translation: Translation2d, rotation: Double, fieldRelative: Boolean, isOpenLoop: Boolean) {
@@ -54,8 +68,12 @@ object Swerve : SubsystemBase() {
         }
     }
 
-    val pose: Pose2d
+    val pose : Pose2d
         get() = swerveOdometry.poseMeters
+
+//    val chassisSpeeds: ChassisSpeeds
+//        get() = swerveKinematics.toChassisSpeeds()
+
 
     fun resetOdometry(pose: Pose2d?) {
         swerveOdometry.resetPosition(yaw, modulePositions, pose)

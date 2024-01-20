@@ -1,4 +1,4 @@
-package org.chillout1778.subsystems
+package org.chillout1778.lib
 
 
 import com.ctre.phoenix6.configs.MagnetSensorConfigs
@@ -105,8 +105,7 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
                 -angleOffset.degrees / 360.0 // TODO: Figure out wtf this needs as input
             ).withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
                 .withSensorDirection(
-                    if (Constants.Swerve.canCoderInvert) SensorDirectionValue.Clockwise_Positive
-                    else SensorDirectionValue.CounterClockwise_Positive
+                    SensorDirectionValue.CounterClockwise_Positive
                 )
         )
     }
@@ -115,8 +114,8 @@ class SwerveModule(var moduleNumber: Int, moduleConstants: SwerveModuleConstants
         mAngleMotor.controller.setPositionPIDWrappingEnabled(true);
         mAngleMotor.controller.setPositionPIDWrappingMinInput(0.0);
         mAngleMotor.controller.setPositionPIDWrappingMaxInput(2 * Math.PI);
-        mAngleMotor.inverted = Constants.Swerve.angleMotorInvert
-        mAngleMotor.neutralMode = Constants.Swerve.angleNeutralMode
+        mAngleMotor.inverted = true
+        mAngleMotor.neutralMode = CANSparkMax.IdleMode.kCoast
         mAngleMotor.controller.p = Constants.Swerve.angleKP
         mAngleMotor.controller.i = Constants.Swerve.angleKI
         mAngleMotor.controller.d = Constants.Swerve.angleKD
