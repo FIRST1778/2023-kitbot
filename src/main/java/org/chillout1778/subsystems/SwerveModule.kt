@@ -36,9 +36,8 @@ class SwerveModule(
     private val turnCanCoder = CANcoder(turnCanCoderId)
 
     private val drivePID: PIDController = Constants.Swerve.driveController()
-    private val turnPID: ProfiledPIDController = Constants.Swerve.turnController()
+    private val turnPID: PIDController = Constants.Swerve.turnController()
     private val driveFeedforward: SimpleMotorFeedforward = Constants.Swerve.driveFeedforward()
-    private val turnFeedforward:  SimpleMotorFeedforward = Constants.Swerve.turnFeedforward()
 
     // TODO: Voltage compensation???
 
@@ -46,14 +45,13 @@ class SwerveModule(
         driveMotor.configurator.apply(
             MotorOutputConfigs().withInverted(driveInversion)
         )
-        // CTRE documentation says this is persistent -- does that mean
-        // across boots???
         driveMotor.configurator.apply(
             FeedbackConfigs().withSensorToMechanismRatio(1.0)
                              .withRotorToSensorRatio(1.0)
         )
         turnMotor.inverted = true
         turnMotor.idleMode = CANSparkMax.IdleMode.kCoast
+        turnMotor.encoder.positionConversionFactor = 1.0
         turnMotor.burnFlash()
         turnCanCoder.configurator.apply(
             MagnetSensorConfigs().withMagnetOffset(-encoderOffset / (2.0*Math.PI))
@@ -69,7 +67,7 @@ class SwerveModule(
     val drivePosition get() = 2.0*Math.PI * driveMotor.position.value * Constants.Swerve.driveReduction * Constants.Swerve.colsonWheelRadius
     val turnPosition get()  = Util.wrapAngle(2.0*Math.PI * Constants.Swerve.angleReduction * turnMotor.encoder.position)
     val coderPosition get() = Util.wrapAngle(2.0*Math.PI * turnCanCoder.absolutePosition.value)
-    val turnVelocity get()  = 2.0*Math.PI / 60.0 * Constants.Swerve.angleReduction * turnMotor.encoder.velocity
+    val turnVelocity get()  = Math.PI/30.0 * Constants.Swerve.angleReduction * turnMotor.encoder.velocity
 
     val state get() = SwerveModuleState(
         driveVelocity, Rotation2d(turnPosition)
@@ -120,19 +118,13 @@ class SwerveModule(
         val driveAmount = drivePID.calculate(driveVelocity, optimizedState.speedMetersPerSecond)
             + driveFeedforward.calculate(optimizedState.speedMetersPerSecond)
         driveMotor.setVoltage(clampVoltage(driveAmount))
-        if (optimizedState.speedMetersPerSecond > 0.01) {
-            val turnAmount = turnPID.calculate(turnPosition, Util.wrapAngle(optimizedState.angle.radians))
-                + turnFeedforward.calculate(turnPID.setpoint.velocity)
-            turnMotor.setVoltage(clampVoltage(turnAmount))
-        } else {
-            turnMotor.setVoltage(0.0)
-        }
+        val turnAmount = turnPID.calculate(turnPosition, Util.wrapAngle(optimizedState.angle.radians))
+        turnMotor.setVoltage(clampVoltage(turnAmount))
     }
 
     override fun initSendable(builder: SendableBuilder?) {
         builder!!
-        // super.initSendable(builder)
         builder.addDoubleProperty("Turn position (deg)", {Math.toDegrees(turnPosition)}, {})
-        builder.addDoubleProperty("Coder position (deg)", {Math.toDegrees(coderPosition)}, {})
+        builder.addDoubleProperty("Diff from CANCoder (deg)", {Math.toDegrees(turnPosition - coderPosition)}, {})
     }
 }
