@@ -16,11 +16,15 @@ class Util {
         fun clamp(n: Double, range: Double) = Math.min(range, Math.max(-range, n))
         fun deadband(n: Double) = if (Math.abs(n) < 0.1) 0.0 else n
         fun wrapAngle(n: Double): Double {
-            val n2 = n % (2.0*Math.PI)
+            var n2 = n % (2.0*Math.PI)
             if (n2 < 0.0)
-                return n2 + 2.0*Math.PI
-            else
-                return n2
+                n2 += 2.0*Math.PI
+            if (n2 > Math.PI)
+                n2 -= 2*Math.PI
+            if (n2 < -Math.PI || n2 > Math.PI) {
+                println("Something is very wrong: $n2")
+            }
+            return n2
         }
     }
 }

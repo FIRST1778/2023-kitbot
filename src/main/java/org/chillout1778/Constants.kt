@@ -28,7 +28,8 @@ object Constants {
         val moduleXY = Units.inchesToMeters(11.75)
         val moduleRadius = moduleXY * sqrt(2.0)
 
-        const val driveReduction = 1.0 / 6.12
+        val driveReduction = 1.0 / 6.12
+        val angleReduction = 1.0 / (150.0 / 7.0)
         val colsonWheelRadius = Units.inchesToMeters(2.0)
         //val neoFreeSpeed = 5676.0 * Math.PI / 30.0
         //val theoreticalMaxSpeed = neoFreeSpeed * driveReduction * colsonWheelRadius
@@ -42,10 +43,10 @@ object Constants {
         val maxAngularAcceleration = 1.0 // Math.PI / 2.0
         val maxVoltage: Double = 5.0
 
-        fun driveController() = PIDController(0.3, 0.0, 0.0)
-        fun turnController()  = ProfiledPIDController(0.0, 0.0, 0.0,
+        fun driveController() = PIDController(0.8, 0.0, 0.0)
+        fun turnController()  = ProfiledPIDController(0.8, 0.0, 0.0,
             TrapezoidProfile.Constraints(
-                1.0, 1.0
+                3.0, 3.0
                 // TODO: correct now that we control velocity?
             )
         )
