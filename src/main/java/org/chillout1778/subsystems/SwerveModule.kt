@@ -123,5 +123,7 @@ class SwerveModule(
         builder!!
         builder.addDoubleProperty("Turn position (deg)", {Math.toDegrees(turnPosition)}, {})
         builder.addDoubleProperty("Diff from CANCoder (deg)", {Math.toDegrees(turnPosition - coderPosition)}, {})
+        builder.addDoubleProperty("Drive voltage", {driveMotor.supplyVoltage.value}, {})
+        builder.addDoubleProperty("Drive velocity", {driveVelocity}, {})
     }
 }

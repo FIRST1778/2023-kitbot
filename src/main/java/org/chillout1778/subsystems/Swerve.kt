@@ -81,6 +81,7 @@ object Swerve: SubsystemBase() {
     )
 
     fun drive(x: Double, y: Double, rot: Double) {
+        println("rot $rot")
         // TODO: use ChassisSpeeds.discretize() once we have
         // WPILib 2024; this accounts for setting motor outputs
         // every 20ms instead of continuously.

@@ -9,13 +9,19 @@ import com.revrobotics.CANSparkMax
 import com.revrobotics.CANSparkMaxLowLevel
 import edu.wpi.first.wpilibj.XboxController
 import edu.wpi.first.math.MathUtil
+import org.chillout1778.commands.FaceAprilTagCommand
+import org.chillout1778.subsystems.Vision
 
 object Robot: TimedRobot() {
     fun start() {
         RobotBase.startRobot{this}
         // Probably a good idea to initialize singleton objects
-        Swerve
         System.out.println("===== 1778's new swerve code is running")
+    }
+
+    override fun robotInit() {
+        Vision
+        Swerve
     }
 
     override fun robotPeriodic() {
@@ -36,5 +42,9 @@ object Robot: TimedRobot() {
     override fun testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll()
+    }
+
+    override fun autonomousInit() {
+        FaceAprilTagCommand().schedule()
     }
 }
